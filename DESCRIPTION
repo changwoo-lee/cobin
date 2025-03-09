@@ -11,4 +11,8 @@ RoxygenNote: 7.3.2
 LinkingTo: 
     Rcpp
 Imports: 
-    Rcpp
+    lme4,
+    Matrix,
+    Rcpp,
+    spam,
+    spNNGP

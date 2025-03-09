@@ -1,19 +1,24 @@
-#' Density of Irwin-hall distribution
+#' Density of Irwin-Hall distribution
 #'
-#' Irwin-Hall distribution is
+#' Irwin-Hall distribution with parameter m is defined as a sum of m uniform (0,1) distribution. 
+#' 
+#' avoid overflow by using log scale
+#' and using symmetry at x = m/2
+#' WARNING: m > 70~80 might have numerical issues\
 #'
-# avoid overflow by using log scale
-# and using symmetry at x = m/2
-# WARNING: m > 70~80 might have numerical issues\
+#' @param x num(length n), between 0 and m, evaluation point
+#' @param m integer, parameter
+#' @param log logical, return log density if TRUE
 #'
-#' @param x
-#' @param m
-#' @param log
-#'
-#' @returns
+#' @returns density value at x
 #' @export
 #'
 #' @examples
+#' 
+#' m = 4
+#' xgrid= seq(0, m, length = 500)
+#' plot(xgrid, dIH(xgrid, m, log = FALSE))
+#' 
 dIH <- function(x, m, log = F){
   n = length(x)
   # check x is between 0 and 1

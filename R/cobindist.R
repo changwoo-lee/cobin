@@ -1,5 +1,5 @@
 
-#' Random variate generation for continuous binomial distribution
+#' Random variate generation for cobin (continuous binomial) distribution
 #'
 #' y ~ cobin(theta, 1/lambda)
 #' which is distributionally equivalent to
@@ -8,7 +8,7 @@
 #' Continuous Bernoulli distribution with parameter theta has a density function
 #' f(y; theta) = theta/(e^theta-1) * e^(theta * y)
 #' or equivalently, with phi = e^theta/(1+e^theta),
-#' f(y; phi) \propto phi^y * (1-phi)^(1-y)
+#' f(y; phi) propto phi^y * (1-phi)^(1-y)
 #'
 #' @param n integer, number of samples
 #' @param theta scalar or length n vector, theta
@@ -18,6 +18,11 @@
 #' @export
 #'
 #' @examples
+#' 
+#' hist(rcobin(1000, 2, 3), freq = FALSE)
+#' xgrid = seq(0, 1, length = 500)
+#' lines(xgrid, dcobin(xgrid, 2, 3))
+#' 
 rcobin <- function(n, theta, lambda){
   # check lambda is integer
   if(any(lambda %% 1 != 0)){
@@ -45,6 +50,24 @@ rcobin <- function(n, theta, lambda){
 
 
 
+#' Density function of cobin (continuous binomial) distribution
+#'
+#' @param x num (length n), between 0 and 1, evaluation point
+#' @param theta num (length 1 or n), canonical parameter
+#' @param lambda integer, inverse of dispersion parameter
+#' @param log logical, return log density?
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+#' 
+#' xgrid = seq(0, 1, length = 500)
+#' plot(xgrid, dcobin(xgrid, 0, 1), type="l", ylim = c(0,3)) # uniform 
+#' lines(xgrid, dcobin(xgrid, 0, 3))
+#' plot(xgrid, dcobin(xgrid, 2, 3), type="l")
+#' lines(xgrid, dcobin(xgrid, -2, 3))
+#' 
 dcobin <- function(x, theta, lambda, log = FALSE){
   n = length(x)
   if(length(theta) == 1){

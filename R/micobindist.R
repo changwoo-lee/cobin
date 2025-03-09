@@ -1,3 +1,14 @@
+#' Title
+#'
+#' @param n 
+#' @param theta 
+#' @param psi 
+#' @param r 
+#'
+#' @returns
+#' @export
+#'
+#' @examples
 rmicobin <- function(n, theta, psi, r = 2){
   # ensure length of r is either 1 or n
   if(length(r) != 1){
@@ -5,6 +16,10 @@ rmicobin <- function(n, theta, psi, r = 2){
   }
   if(length(psi) != 1 & length(psi) != n){
     stop("length of psi must be either 1 or n")
+  }
+  # ensure psi is between 0 and 1
+  if(any(psi < 0) || any(psi > 1)){
+    stop("psi must be between 0 and 1")
   }
   # ensure length of theta is either 1 or n
   if(length(theta) != 1 & length(theta) != n){
@@ -20,6 +35,19 @@ rmicobin <- function(n, theta, psi, r = 2){
   }
 }
 
+#' Title
+#'
+#' @param x 
+#' @param theta 
+#' @param psi 
+#' @param r 
+#' @param log 
+#' @param l_max 
+#'
+#' @returns
+#' @export
+#'
+#' @examples
 dmicobin <- function(x, theta, psi, r = 2, log = FALSE, l_max = 70){
   # ensure length of ththeta, r, q are all 1
   if(length(r) != 1 | length(psi) != 1){

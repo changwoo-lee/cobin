@@ -13,7 +13,7 @@ fit_micobin_fixedeffect <- function(y, X, Z, priors,
   beta_intercept_scale = priors$beta_intercept_scale
   beta_scale = priors$beta_scale
   lambda_max = priors$lambda_max
-  psi_ab = prior$psi_ab
+  psi_ab = priors$psi_ab
   beta_s = c(beta_intercept_scale, rep(beta_scale,p-1))
 
   # Initialize
@@ -53,7 +53,7 @@ fit_micobin_fixedeffect <- function(y, X, Z, priors,
 
 
     # Step 1-1: sample lambda
-    linpred = Xbeta
+    linpred = as.numeric(Xbeta)
     temp = (linpred*y - bft(linpred) + log(1-psi)) %*% t(lvec)
     lambda_logprobs = temp + logh_grid - matrix(log(1-psi), n, lambda_max) + matrix(log(lvec), n, lambda_max, byrow = T) + matrix(2*log(psi), n, lambda_max) # last term does not matter but included for log-likelihood calculation
     loglik = matrixStats::rowLogSumExps(lambda_logprobs) # sum over lambda

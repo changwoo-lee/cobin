@@ -1,5 +1,5 @@
 
-#' Title
+#' cobin generalized linear (mixed) models
 #'
 #' @param formula
 #' @param data
@@ -9,6 +9,8 @@
 #' @param nburn
 #' @param nsave
 #' @param nthin
+#' @import lme4
+#' @import Matrix
 #'
 #' @returns
 #' @export
@@ -79,15 +81,13 @@ cobinreg <- function(formula, data, link = "cobit", contrasts = NULL,
 
 #
 # source("r/cobin.r")
-# # Example 1
+# Example 1
 # n = 200
 # p = 3
 # X = matrix(rnorm(n*p), n, p)
 # beta = c(0, 3, -3) # without intercept
 # y = rcobin(n, X%*%beta, rep(10, n))
-# plot(X[,1],y, ylim = c(0,1))
-# plot(X[,2],y, ylim = c(0,1))
-# plot(X[,3],y, ylim = c(0,1))
+# 
 # df = data.frame(y = y, X = X)
 # out = cobinreg(y ~ X, data = df)
 # summary(out$post_save)
@@ -96,32 +96,32 @@ cobinreg <- function(formula, data, link = "cobit", contrasts = NULL,
 # # example 2: random intercept model
 #
 # # Define parameters
-# n <- 2000
+# n <- 1000
 # p <- 3
 # X <- matrix(rnorm(n * p), n, p)
 # beta <- c(0, 3, -3)  # without intercept
 # # Define grouping variable (10 groups with n/10 observations each)
 # id <- rep(1:10, each = n/10)
-#
+# 
 # # Simulate random intercepts for each group
 # sigma_re <- 1  # standard deviation for random effects
 # u <- rnorm(10, mean = 0, sd = sigma_re)
 # u = u - mean(u)
-#
+# 
 # y = rcobin(n, X%*%beta + u[id], rep(10, n))
 # # Combine into a data frame
 # df = data.frame(y = y, X=X, id = id)
-#
-# X%*%beta + u[id]
-#
+# 
 # out = cobinreg(y ~ X + (1|id), data = df, nburn = 10, nsave = 1000)
-#
+# 
+#  u
+#  (out$post_u_save)
+#  summary(out$post_save)
+# # str(out$post_save)
+# #
+# bayesplot::mcmc_trace(out$post_save)
+# bayesplot::mcmc_intervals(out$post_u_save)
 # u
-# colMeans(out$post_u_save)
-# summary(out$post_save)
-# str(out$post_save)
-#
-# bayesplot::mcmc_intervals(out$post_save)
 # bayesplot::mcmc_trace(out$post_save)
 # bayesplot::mcmc_trace(out$post_u_save)
 #

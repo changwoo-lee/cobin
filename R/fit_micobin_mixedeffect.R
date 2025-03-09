@@ -13,7 +13,7 @@ fit_micobin_mixedeffect <- function(y, X, Z, priors,
   beta_intercept_scale = priors$beta_intercept_scale
   beta_scale = priors$beta_scale
   lambda_max = priors$lambda_max
-  psi_ab = prior$psi_ab
+  psi_ab = priors$psi_ab
   a_u = priors$a_u
   b_u = priors$b_u
   beta_s = c(beta_intercept_scale, rep(beta_scale,p-1))
@@ -40,11 +40,11 @@ fit_micobin_mixedeffect <- function(y, X, Z, priors,
 
   # Run MCMC
   # pre-calculate h(y, lambda)
-  logh_grid = matrix(0, n, length(lambda_grid))
-  for(l in 1:length(lambda_grid)){
-    logh_grid[,l]  = log(lambda_grid[l]) + dIH(lambda_grid[l]*y, lambda_grid[l], log = T)
+  logh_grid = matrix(0, n, lambda_max)
+  for(l in 1:lambda_max){
+    logh_grid[,l]  = log(l) + dIH(l*y, l, log = T)
   }
-  colsum_logh_grid = colSums(logh_grid)
+  lvec = 1:lambda_max
 
   # initialize
   ZtKappaX = (t(Z*kappa)%*%X)
@@ -65,7 +65,7 @@ fit_micobin_mixedeffect <- function(y, X, Z, priors,
 
 
     # Step 1-1: sample lambda
-    linpred = Xbeta + Zu
+    linpred = as.numeric(Xbeta + Zu)
     temp = (linpred*y - bft(linpred) + log(1-psi)) %*% t(lvec)
     lambda_logprobs = temp + logh_grid - matrix(log(1-psi), n, lambda_max) + matrix(log(lvec), n, lambda_max, byrow = T) + matrix(2*log(psi), n, lambda_max) # last term does not matter but included for log-likelihood calculation
     loglik = matrixStats::rowLogSumExps(lambda_logprobs) # sum over lambda
@@ -73,7 +73,7 @@ fit_micobin_mixedeffect <- function(y, X, Z, priors,
     lambda = sample.rowwise(lambda_probs)
 
     # Step 1-2: sample kappa
-    kappa = rkgcpp(n, as.numeric(rep(lambda, n)), as.numeric(linpred))
+    kappa = rkgcpp(n, as.numeric(lambda), as.numeric(linpred))
 
     ZtKappaX = (t(Z*kappa)%*%X)
     XtKappaX = (t(X*kappa)%*%X)
