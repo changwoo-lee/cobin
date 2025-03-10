@@ -13,7 +13,7 @@ fit_cobin_mixedeffect <- function(y, X, Z, priors,
   beta_intercept_scale = priors$beta_intercept_scale
   beta_scale = priors$beta_scale
   lambda_grid = priors$lambda_grid
-  lambda_prior = priors$lambda_prior
+  lambda_logprior = priors$lambda_logprior
   a_u = priors$a_u
   b_u = priors$b_u
   beta_s = c(beta_intercept_scale, rep(beta_scale,p-1))
@@ -69,7 +69,7 @@ fit_cobin_mixedeffect <- function(y, X, Z, priors,
     # Step 1-1: sample lambda
     linpred = Xbeta + Zu
     temp = (linpred*y - bft(linpred)) %*% t(lambda_grid)
-    lambda_logprobs = colSums(temp) + colsum_logh_grid + log(lambda_prior)
+    lambda_logprobs = colSums(temp) + colsum_logh_grid + lambda_logprior
     lambda = sample(lambda_grid, size = 1, prob = exp(lambda_logprobs - matrixStats::logSumExp(lambda_logprobs) ))
 
     # Step 1-2: sample kappa

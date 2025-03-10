@@ -8,7 +8,6 @@
 #' @param data
 #' @param link
 #' @param coords
-#' @param lonlat
 #' @param NNGP
 #' @param contrasts
 #' @param priors
@@ -22,7 +21,7 @@
 #'
 #' @examples
 spmicobinreg <- function(formula, data, link = "cobit",
-                       coords, lonlat = FALSE, NNGP = FALSE, contrasts = NULL,
+                       coords, NNGP = FALSE, contrasts = NULL,
                        priors = list(beta_intercept_scale = 10,
                                      beta_scale = 2.5, beta_df = Inf),
                        nngp.control = list(n.neighbors = 15, ord = order(coords[, 1])),
@@ -36,11 +35,8 @@ spmicobinreg <- function(formula, data, link = "cobit",
   y = model.response(temp_lm)
   X = model.matrix(temp_lm, data = data)
 
-  if(lonlat){
-    distmat = fields::rdist.earth(coords, miles = FALSE)
-  }else{
-    distmat = fields::rdist(coords)
-  }
+  
+  distmat = fields::rdist(coords)
 
 
   if(any(y < 0) || any(y > 1)) stop("y must be between 0 and 1")
@@ -59,7 +55,7 @@ spmicobinreg <- function(formula, data, link = "cobit",
     priors$lambda_max = 70
   }
   if(is.null(priors$psi_ab)){
-    priors$psi_ab = c(1,1)
+    priors$psi_ab = c(2,2)
   }
 
   if(is.null(priors$logprior_sigma.sq)){
@@ -133,7 +129,49 @@ spmicobinreg <- function(formula, data, link = "cobit",
 }
 
 
-
-
-
-
+# 
+# n <- 1000
+# p <- 1
+# X <- matrix(rnorm(n * p), n, p)
+# beta <- 1  # without intercept
+# 
+# library(fields)
+# coords = cbind(runif(n), runif(n))
+# dmat = rdist(coords)
+# Sigma = 1*Matern(dmat, range = 1/0.1, smoothness = 0.5)
+# u =as.numeric(mvnfast::rmvn(1, rep(0, n), Sigma))
+# y = rmicobin(n, X%*%beta + u, rep(0.5, n))
+# 
+# df = data.frame(y = y, X=X)
+# 
+# quilt.plot(coords, u - mean(u))
+# 
+# myout1 = spmicobinreg(y ~ X, df, coords = coords, NNGP = F, priors = list(phi_lb = 0.1, phi_ub = 0.1),
+#                     #nngp.control = list(n.neighbors = 30, ord = order(coords[, 1])),
+#                     nburn = 100, nsave = 1000, nthin = 1)
+# myout1$t_mcmc
+# quilt.plot(coords, colMeans(myout1$post_u_save))
+# summary(myout1$post_save)
+# plot(myout1$post_save)
+# summary(myout1$post_save[,"sigma.sq"])
+# 
+# library(GpGp)
+# myord = GpGp::order_maxmin(coords)
+# 
+# 
+# library(spNNGP)
+# myout2 = spmicobinreg(y ~ X, df, coords = coords, NNGP = T, priors = list(phi_lb = 0.1, phi_ub = 0.1),
+#                     #nngp.control = list(n.neighbors = 30, ord = myord),
+#                     nburn = 100, nsave = 1000, nthin = 1)
+# myout2$t_mcmc
+# quilt.plot(coords, colMeans(myout2$post_u_save))
+# summary(myout2$post_save)
+# plot(myout2$post_save)
+# quilt.plot(coords, u)
+# bayesplot::mcmc_intervals(myout1$post_save)
+# bayesplot::mcmc_intervals(myout2$post_save)
+# #
+# 
+# 
+# 
+# 

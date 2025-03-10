@@ -1,12 +1,12 @@
 
-fit_cobin_fixedeffect <- function(y, X, Z, priors,
-                               nburn = 100, nsave = 1000, nthin = 1,  verbose=TRUE){
-
+fit_cobin_fixedeffect_mh <- function(y, X, Z, priors,
+                                  nburn = 100, nsave = 1000, nthin = 1,  verbose=TRUE){
+  
   t_start = Sys.time()
   #############################################
   n = nrow(X)
   p = ncol(X)
-
+  
   # set hyperparameters
   beta_df = priors$beta_df
   beta_intercept_scale = priors$beta_intercept_scale
@@ -14,7 +14,7 @@ fit_cobin_fixedeffect <- function(y, X, Z, priors,
   lambda_grid = priors$lambda_grid
   lambda_logprior = priors$lambda_logprior
   beta_s = c(beta_intercept_scale, rep(beta_scale,p-1))
-
+  
   # Initialize
   beta = rep(0,p)
   betavar = beta_s^2
@@ -26,7 +26,7 @@ fit_cobin_fixedeffect <- function(y, X, Z, priors,
   beta_save = array(0, dim = c(nsave, p))
   lambda_save = matrix(0, nsave, 1)
   loglik_save = array(0, dim = c(nsave, n))
-
+  acc_save = numeric(nmcmc)
   # Run MCMC
   # pre-calculate h(y, lambda)
   logh_grid = matrix(0, n, length(lambda_grid))
@@ -35,7 +35,13 @@ fit_cobin_fixedeffect <- function(y, X, Z, priors,
   }
   colsum_logh_grid = colSums(logh_grid)
   Xt_ym0.5 = crossprod(X, y-0.5)
-
+  
+  MH_eps = 0.001
+  MH_s_d = (2.38)^2/p 
+  C0 = MH_s_d*diag(p) 
+  start_adapt = 100 # adapt after 100 iterations
+  
+  
   t_end = Sys.time()
   t_premcmc = difftime(t_end, t_start, units = "secs")
   if(verbose){
@@ -48,26 +54,46 @@ fit_cobin_fixedeffect <- function(y, X, Z, priors,
     if(verbose){
       setTxtProgressBar(pb, imcmc/(nburn + nsave*nthin))
     }
-
-
+    
+    
     # Step 1-1: sample lambda
     temp = (Xbeta*y - bft(Xbeta)) %*% t(lambda_grid)
     lambda_logprobs = colSums(temp) + colsum_logh_grid + lambda_logprior
     lambda = sample(lambda_grid, size = 1, prob = exp(lambda_logprobs - matrixStats::logSumExp(lambda_logprobs) ))
-
-    # Step 1-2: sample kappa
-    kappa = rkgcpp(n, as.numeric(rep(lambda, n)), as.numeric(Xbeta))
-
-    # Step 2: sample beta
-    Vbetainv = diag(1/betavar, ncol = p) + crossprod(sqrt(kappa)*X) # same as t(D)%*%diag(omega)%*%D
-    #betatilde = solve(Vbetainv, lambda * Xt_ym0.5) # Y: binary vector
-    beta = as.numeric(spam::rmvnorm.canonical(1, lambda * Xt_ym0.5, Vbetainv))
-    Xbeta = X%*%beta
-    # update beta variance for mixture prior
-    if(!is.infinite(beta_df)){
-      gamma = 1/rgamma(p, shape = beta_df/2 + 1/2, rate = beta_s^2*beta_df/2 + beta^2/2)
+    
+    # Step 1-2: sample beta
+    if(imcmc < start_adapt){
+      beta_star = beta + as.numeric(mvnfast::rmvn(1, rep(0,p), C0))
+    }else{
+      beta_star = beta + as.numeric(mvnfast::rmvn(1, rep(0,p), Ct))
     }
-
+    Xbeta_star = X%*%beta_star
+    acc_ratio = #sum(dnorm(beta_star, rep(0,p), beta_s, log = T) - dnorm(beta, rep(0,p), beta_s, log = T)) + # uniform prior on rho
+      lambda*sum(y*(Xbeta_star - Xbeta)) +
+      lambda*sum(-bft(Xbeta_star) + bft(Xbeta)) # likelihood
+    
+    if(log(runif(1)) < acc_ratio){
+      beta = beta_star
+      Xbeta = Xbeta_star
+      acc_save[imcmc] = 1
+    }
+    
+    # mut and Ct are recursively updated
+    
+    if(imcmc == 1){
+      mut = beta
+      Ct = MH_s_d*MH_eps
+    }else{
+      tmpmu = (mut*(imcmc-1)+beta)/imcmc
+      # eq (3) of Haario et al. 2001
+      Ct = (imcmc-1)*Ct/imcmc+MH_s_d/imcmc*(imcmc*tcrossprod(mut)-
+                                              (imcmc+1)*tcrossprod(tmpmu) +
+                                              tcrossprod(beta)+
+                                              MH_eps*diag(p))
+      mut = tmpmu
+    }
+    
+    
     # save
     if((imcmc > nburn)&&((imcmc-nburn)%%nthin==0)){
       beta_save[isave,] = beta
@@ -78,18 +104,19 @@ fit_cobin_fixedeffect <- function(y, X, Z, priors,
   }
   t_end = Sys.time()
   t_mcmc = difftime(t_end, t_start, units = "secs")
-
-
+  
+  
   out = list()
   colnames(beta_save) = colnames(X)
   colnames(lambda_save) = "lambda"
   out$post_save = coda::mcmc(cbind(beta_save, lambda_save))
-
+  
   out$loglik_save = loglik_save
   out$nsave = nsave
-
+  out$acc_save = acc_save
+  out$Ct = Ct
   out$priors = priors
-
+  
   out$t_mcmc = t_mcmc
   out$t_premcmc = t_premcmc
   out$y = y

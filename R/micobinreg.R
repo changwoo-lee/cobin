@@ -62,7 +62,7 @@ micobinreg <- function(formula, data, link = "cobit", contrasts = NULL,
     priors$lambda_max = 70
   }
   if(is.null(priors$psi_ab)){
-    priors$psi_ab = c(1,1)
+    priors$psi_ab = c(2,2)
   }
 
   if(any(y == 0) || any(y == 1)){

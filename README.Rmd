@@ -12,7 +12,7 @@ knitr::opts_chunk$set(
   out.width = "100%"
 )
 ```
-# cobinreg
+# cobin: R package for continuous binomial (cobin) regression and extensions
 
 <!-- badges: start -->
 <!-- badges: end -->
@@ -21,7 +21,9 @@ Glossaries: GLM: generalized linear model; GLMM: generalized linear mixed model;
 GP: Gaussian process; NNGP: nearest neighbor Gaussian process; 
 cobin: continuous binomial; micobin: mixture of continuous binomial;
 
-**Basic functions**
+## Code structure
+
+### Basic functions
 
 - cobin.R: 
   - `dcobin(x, theta, lambda)`: Density of $\mathrm{cobin}(\theta, \lambda^{-1})$ at x  
@@ -31,7 +33,7 @@ cobin: continuous binomial; micobin: mixture of continuous binomial;
   - `rmicobin(n, theta, psi)`: Random variate generation from $\mathrm{micobin}(\theta, \psi)$
 
 
-**Cobin / Micobin regression (Bayesian, cobit link)**
+### Cobin / Micobin regression (Bayesian, cobit link)
 
 - cobinreg.R: 
   - `cobinreg()`: fit Bayesian cobin GLM or GLMM
@@ -43,7 +45,7 @@ cobin: continuous binomial; micobin: mixture of continuous binomial;
   - └── fit_micobin_mixedeffect.R: backend function for micobin GLMM
 
 
-**Spatial cobin / micobin regression (Bayesian, cobit link)**
+### Spatial cobin / micobin regression (Bayesian, cobit link)
 
 - spcobinreg.R: 
   - `cobinreg()`: fit spatial cobin regresson 
@@ -55,7 +57,7 @@ cobin: continuous binomial; micobin: mixture of continuous binomial;
   - └── fit_micobin_spatial_NNGP.R: backend function with NNGP random effect
 
 
-**Helper functions**
+### Helper functions
 
 - CB.R: 
   - `qcb()`, `rcb()`: quantile and random variate generation of continuous Bernoulli
@@ -72,7 +74,7 @@ cobin: continuous binomial; micobin: mixture of continuous binomial;
 
 
 
-**cobin regression (non-Bayesian)**
+### cobin regression (non-Bayesian)
 
 - glm.cobin.R: 
   - `glm.cobin()`: fit cobin GLM using iteratively reweighted least squares (`stats::glm.fit`). Supports link functions "cobit", "logit", "probit", "cloglog", "cauchit".

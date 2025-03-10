@@ -85,7 +85,8 @@ glm.cobin <- function (formula, data, weights, subset, na.action, start = NULL,
   ####################
   fam <- do.call("cobinfamily",list(lambda = lambdahat, link = link))
   ####################
-
+  if (any(Y == 0) || any(Y==1)) warning("Response has bounary values (0 or 1), results should be interpreted as quasi-MLE unless lambda = 1")
+  
   fit <- glm.fitter(x = X, y = Y, weights = w, start = start,
                     etastart = etastart, mustart = mustart, offset = offset,
                     family = fam, control = list(maxit = control$maxit,
@@ -114,3 +115,30 @@ glm.cobin <- function (formula, data, weights, subset, na.action, start = NULL,
   names(out$ll_save) = paste("lambda =",out$lambda_list)
   return(out)
 }
+
+# 
+# andrew <- read.csv("/Users/clee/Dropbox/research/cobin/cobinreg/demo/andrew.csv", colClasses = c(QUAD = "factor", PATCH = "factor"))
+# andrew$PATCHm <- as.factor(as.numeric(as.character(andrew$PATCH)) %% 5 + 1)
+# library(plyr)
+# andrew2 <- ddply(andrew, ~PATCH, summarise, ALGAE.mean = mean(ALGAE) / 100, treat = TREAT[1])
+# andrew2
+# 
+# 
+# andrew2$treat1234 = as.numeric(as.factor(andrew2$treat))
+# 
+# 
+# out = glm.cobin(ALGAE.mean ~ treat1234, data = andrew2, link = "cobit")
+# 
+# model.matrix(out)
+# 
+# 
+# summary(out)
+# plot(out)
+# 
+
+
+
+
+
+
+

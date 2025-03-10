@@ -9,7 +9,6 @@ spmicobinreg(
   data,
   link = "cobit",
   coords,
-  lonlat = FALSE,
   NNGP = FALSE,
   contrasts = NULL,
   priors = list(beta_intercept_scale = 10, beta_scale = 2.5, beta_df = Inf),

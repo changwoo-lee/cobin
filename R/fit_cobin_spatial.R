@@ -12,7 +12,7 @@ fit_cobin_spatial <- function(y, X, coords, distmat, priors,
   beta_intercept_scale = priors$beta_intercept_scale
   beta_scale = priors$beta_scale
   lambda_grid = priors$lambda_grid
-  lambda_prior = priors$lambda_prior
+  lambda_logprior = priors$lambda_logprior
 
   logprior_sigma.sq = priors$logprior_sigma.sq # function
   phi_lb = priors$phi_lb
@@ -83,7 +83,7 @@ fit_cobin_spatial <- function(y, X, coords, distmat, priors,
     # Step 1-1: sample lambda
     linpred = Xbeta + u
     temp = (linpred*y - bft(linpred)) %*% t(lambda_grid)
-    lambda_logprobs = colSums(temp) + colsum_logh_grid + log(lambda_prior)
+    lambda_logprobs = colSums(temp) + colsum_logh_grid + lambda_logprior
     lambda = sample(lambda_grid, size = 1, prob = exp(lambda_logprobs - matrixStats::logSumExp(lambda_logprobs) ))
 
     # Step 1-2: sample kappa

@@ -12,7 +12,8 @@ cobinreg(
   priors = list(beta_intercept_scale = 10, beta_scale = 2.5, beta_df = Inf),
   nburn = 1000,
   nsave = 1000,
-  nthin = 1
+  nthin = 1,
+  MH = F
 )
 }
 \description{

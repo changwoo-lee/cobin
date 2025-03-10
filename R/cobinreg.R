@@ -19,7 +19,7 @@
 cobinreg <- function(formula, data, link = "cobit", contrasts = NULL,
                      priors = list(beta_intercept_scale = 10,
                                    beta_scale = 2.5, beta_df = Inf),
-                     nburn = 1000, nsave = 1000, nthin = 1){
+                     nburn = 1000, nsave = 1000, nthin = 1, MH = F){
   if(link != "cobit") stop("only supports cobit link")
 
   isZ = length(lme4::findbars(formula)) > 0
@@ -58,8 +58,7 @@ cobinreg <- function(formula, data, link = "cobit", contrasts = NULL,
     priors$lambda_grid = 1:70
   }
   if(is.null(priors$lambda_prior)){
-    priors$lambda_prior = rep(1,length(priors$lambda_grid)) #or 0.9^priors$lambda_grid
-    priors$lambda_prior = priors$lambda_prior/sum(priors$lambda_prior)
+    priors$lambda_logprior = log(lambda_grid) + lfactorial(lambda_grid) - lfactorial(lambda_grid+4) + log(36)
   }
   if(any(y == 0) || any(y == 1)){
     if(priors$lambdagrid != 1) stop("y must be strictly between 0 and 1, unless lambda is fixed as 1")
@@ -69,6 +68,11 @@ cobinreg <- function(formula, data, link = "cobit", contrasts = NULL,
     if(is.null(priors$b_u)) priors$b_u = 1
   }
 
+  if(!isZ && MH){
+    return(fit_cobin_fixedeffect_mh(y = y, X = X, priors = priors,
+                             nburn = nburn, nsave = nsave, nthin = nthin))
+  }
+  
   if(!isZ){
     out = fit_cobin_fixedeffect(y = y, X = X, priors = priors,
                              nburn = nburn, nsave = nsave, nthin = nthin)
@@ -81,16 +85,39 @@ cobinreg <- function(formula, data, link = "cobit", contrasts = NULL,
 
 #
 # source("r/cobin.r")
-# Example 1
-# n = 200
+#Example 1
+# n = 1000
 # p = 3
 # X = matrix(rnorm(n*p), n, p)
 # beta = c(0, 3, -3) # without intercept
 # y = rcobin(n, X%*%beta, rep(10, n))
 # 
 # df = data.frame(y = y, X = X)
-# out = cobinreg(y ~ X, data = df)
-# summary(out$post_save)
+# out1 = cobinreg(y ~ X, data = df, nburn = 1000, nsave = 1000)
+# out2 = cobinreg(y ~ X, data = df, MH = T, nburn = 1000, nsave = 1000, nthin = 1)
+# coda::effectiveSize(out1$post_save)/as.numeric(out1$t_mcmc)
+# coda::effectiveSize(out2$post_save)/as.numeric(out2$t_mcmc)
+# 
+# 
+# 
+# n = 1000
+# p = 3
+# X = mvnfast::rmvn(n, rep(0, p), matrix(c(1, 0.9, 0.5,
+#                                          0.9, 1, 0.5,
+#                                          0.5, 0.5, 1), p, p))
+# beta = c(0, 3, -3) # without intercept
+# y = rcobin(n, X%*%beta, rep(10, n))
+# 
+# df = data.frame(y = y, X = X)
+# out1 = cobinreg(y ~ X, data = df, nburn = 1000, nsave = 1000)
+# out2 = cobinreg(y ~ X, data = df, MH = T, nburn = 10000, nsave = 1000, nthin = 1)
+# coda::effectiveSize(out1$post_save)/as.numeric(out1$t_mcmc)
+# coda::effectiveSize(out2$post_save)/as.numeric(out2$t_mcmc)
+# 
+# plot(out2$post_save)
+# 
+# 
+# mean(out2$acc_save[1001:10000])
 #
 #
 # # example 2: random intercept model

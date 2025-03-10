@@ -60,7 +60,6 @@ cobinfamily <- function (lambda = stop("'lambda' must be specified"), link = "co
   initialize <- expression({
     if (any(y < 0)) stop("negative values not allowed")
     if (any(y > 1)) stop("values greater than 1 not allowed")
-    if (any(y == 0) || any(y==1)) warning("Response has bounary values (0 or 1), results should be interpreted as quasi-MLE unless lambda = 1")
     n <- rep(1, nobs)
     y[y>0.9999] = 0.9999 # This is just for initializaton
     y[y<0.0001] = 0.0001 # This is just for initializaton

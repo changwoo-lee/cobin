@@ -29,10 +29,11 @@ fit_micobin_spatial_NNGP <- function(y, X, coords, distmat, priors, ord = ord, N
   sigma.sq = 1
   phi = mean(c(phi_lb, phi_ub))
   Q = build_Q_exponential(distmat,
+                          sigma.sq, 
                           phi,
                           Nlist = Nlist,
                           ord = ord)
-
+  logdetQ = Matrix::determinant(Q, logarithm = TRUE)$modulus
   Q = as(as(Q, "generalMatrix"), "CsparseMatrix")
   print(paste0(round(100-(Matrix::nnzero(Q)-n)/(n^2-n)*100,2), "% of off-diagonal entries of precision matrix is zero"))
   Q = spam::as.spam.dgCMatrix(Q)# spam object
@@ -103,13 +104,15 @@ fit_micobin_spatial_NNGP <- function(y, X, coords, distmat, priors, ord = ord, N
 
     # Step 2: sample beta, marginalizing out u
     #nnmat_inv = solve( + Matrix::Diagonal(n, kappa))
-
     #Vuinv_chol = chol(Q + diag(kappa, nrow = n, ncol = n))
-    Vuinv_chol = chol(1/sigma.sq*Q + spam::diag.spam(kappa, n, n))# spam.chol.NgPeython
+    
+    #QplusKappachol = chol(Q + spam::diag.spam(kappa, n, n), Rstruct = Q_spamstruct)# spam.chol.NgPeython
+    QplusKappachol <- spam::update.spam.chol.NgPeyton(Q_spamstruct, Q + spam::diag.spam(kappa, n, n))
+    
     #nnmat_inv = chol2inv(Vuinv_chol)
-    XtSigma_invX = XtKappaX - crossprod(forwardsolve(Vuinv_chol, ZtKappaX))
-    XtSigma_invY = crossprod(X, (y - 0.5)*lambda) - t(forwardsolve(Vuinv_chol, ZtKappaX))%*%forwardsolve(Vuinv_chol, (y - 0.5)*lambda)
-
+    XtSigma_invX = XtKappaX - crossprod(spam::forwardsolve(QplusKappachol, ZtKappaX))
+    XtSigma_invY = crossprod(X, (y - 0.5)*lambda) - t(spam::forwardsolve(QplusKappachol, ZtKappaX))%*%spam::forwardsolve(QplusKappachol, (y - 0.5)*lambda)
+    
     if(!is.infinite(beta_df)){ # normal prior
       Q_beta = XtSigma_invX + diag(1/gamma, p)
     }else{ # t prior
@@ -117,31 +120,54 @@ fit_micobin_spatial_NNGP <- function(y, X, coords, distmat, priors, ord = ord, N
     }
     b_beta = XtSigma_invY # assuming prior mean is zero
     beta = as.numeric(spam::rmvnorm.canonical(1, b_beta, Q_beta))
-
+    
     Xbeta = X%*%beta
-
+    
     # update beta variance for mixture prior
     if(!is.infinite(beta_df)){
       gamma = 1/rgamma(p, shape = beta_df/2 + 1/2, rate = beta_s^2*beta_df/2 + beta^2/2)
     }
-
+    
     # Step 3-1: sample cov kernel parameters, u marginalized out, beta conditioned on
     # transform sigma.sq to real based on exp transform
     # transform rho \in rho_lb, rho_ub to real based on logistic transform
     # on this transformed space, run random walk with bivariate normal proposal
-
+    
     sigma.sq_trans = log(sigma.sq)
-
+    if(!phi_fixed) phi_trans = glogit(phi, xmin = phi_lb, xmax = phi_ub)
+    
+    
     if(imcmc < start_adapt){
-      proposal = sigma.sq_trans + rnorm(1, 0, sqrt(C0))
+      if(!phi_fixed){
+        proposal = c(sigma.sq_trans, phi_trans) + spam::rmvnorm(1, rep(0,2), C0)
+      }else{
+        proposal = sigma.sq_trans + rnorm(1, 0, sqrt(C0))
+      }
     }else{
-      proposal = sigma.sq_trans + rnorm(1,0, sqrt(Ct))
+      if(!phi_fixed){
+        proposal = c(sigma.sq_trans, phi_trans) + spam::rmvnorm(1, rep(0,2), Ct)
+      }else{
+        proposal = sigma.sq_trans + rnorm(1,0, sqrt(Ct))
+      }
     }
     sigma.sq_trans_star = proposal[1]; sigma.sq_star = exp(sigma.sq_trans_star)
-
+    if(!phi_fixed){
+      phi_trans_star = proposal[2]; phi_star = inv_glogit(phi_trans_star, phi_lb, phi_ub)
+    }else{
+      phi_star = phi
+    }
+    Q_star= build_Q_exponential(distmat,
+                                sigma.sq_star, 
+                                phi_star,
+                                Nlist = Nlist,
+                                ord = ord)
+    logdetQ_star = Matrix::determinant(Q_star, logarithm = TRUE)$modulus
+    Q_star = as(as(Q_star, "generalMatrix"), "CsparseMatrix")
+    Q_star = spam::as.spam.dgCMatrix(Q_star)# spam object
+    #browser()
     linpred_proxy = (lambda*(y - 0.5) - Xbeta*kappa)/kappa
-
-
+    
+    
     # cholSig = chol(diag(1/kappa, nrow = n, ncol = n) + solve(1/sigma.sq*Q))
     # logdetSig = 2*sum(log(diag(cholSig)))
     # logweights = -0.5*sum(backsolve(cholSig, linpred_proxy, transpose = T)^2) - 0.5*logdetSig - n/2*log(2*pi)
@@ -149,56 +175,87 @@ fit_micobin_spatial_NNGP <- function(y, X, coords, distmat, priors, ord = ord, N
     # cholSig = chol(diag(1/kappa, nrow = n, ncol = n) + solve(1/sigma.sq_star*Q))
     # logdetSig = 2*sum(log(diag(cholSig)))
     # logweights_star = -0.5*sum(backsolve(cholSig, linpred_proxy, transpose = T)^2) - 0.5*logdetSig - n/2*log(2*pi)
-
-    QplusKappachol = chol(1/sigma.sq*Q + spam::diag.spam(kappa, n, n))
-    quadform = crossprod(sqrt(kappa)*linpred_proxy) - crossprod(forwardsolve(QplusKappachol, kappa*linpred_proxy))
-    logweights = -0.5*quadform - determinant(QplusKappachol, logarithm = TRUE)$modulus - 0.5*n*log(sigma.sq) # common factor omitted
-
-    QplusKappachol = chol(1/sigma.sq_star*Q + spam::diag.spam(kappa, n, n))
-    quadform = crossprod(sqrt(kappa)*linpred_proxy) - crossprod(forwardsolve(QplusKappachol, kappa*linpred_proxy))
-    logweights_star = -0.5*quadform - determinant(QplusKappachol, logarithm = TRUE)$modulus - 0.5*n*log(sigma.sq_star)
-
-
-    acc_ratio = log(sigma.sq_star) - log(sigma.sq) + # log transformation
-      logprior_sigma.sq(sigma.sq_star) - logprior_sigma.sq(sigma.sq) + # uniform prior on rho
-      logweights_star - logweights
-
-
+    
+    #QplusKappachol = chol(Q + spam::diag.spam(kappa, n, n), Rstruct = Q_spamstruct)
+    #QplusKappachol = spam::update.spam.chol.NgPeyton(Q_spamstruct, Q + spam::diag.spam(kappa, n, n))
+    
+    #quadform = crossprod(sqrt(kappa)*linpred_proxy) - crossprod(forwardsolve(QplusKappachol, kappa*linpred_proxy))
+    quadform = - crossprod(spam::forwardsolve(QplusKappachol, kappa*linpred_proxy))
+    logweights = -0.5*quadform - spam::determinant(QplusKappachol, logarithm = TRUE)$modulus + 0.5*logdetQ# common factor omitted
+    
+    #QplusKappachol_star = chol(Q_star + spam::diag.spam(kappa, n, n), Rstruct = Q_spamstruct)
+    QplusKappachol_star = spam::update.spam.chol.NgPeyton(Q_spamstruct, Q_star + spam::diag.spam(kappa, n, n))
+    #quadform = crossprod(sqrt(kappa)*linpred_proxy) - crossprod(forwardsolve(QplusKappachol_star, kappa*linpred_proxy))
+    quadform = - crossprod(spam::forwardsolve(QplusKappachol_star, kappa*linpred_proxy))
+    logweights_star = -0.5*quadform - spam::determinant(QplusKappachol_star, logarithm = TRUE)$modulus + 0.5*logdetQ_star
+    
+    if(!phi_fixed){
+      acc_ratio = log(sigma.sq_star) - log(sigma.sq) + # log transformation
+        (log(phi_star-phi_lb) + log(phi_ub - phi_star)) - (log(phi-phi_lb) + log(phi_ub - phi)) + # log(rho_ub - rho_lb) terms or cancelled out # https://www.wolframalpha.com/input?i=d%2Fdx+log%28%28x-a%29%2F%28b-a%29%2F%281-%28x-a%29%2F%28b-a%29%29%29
+        logprior_sigma.sq(sigma.sq_star) - logprior_sigma.sq(sigma.sq) + # uniform prior on rho
+        logweights_star - logweights
+    }else{
+      acc_ratio = log(sigma.sq_star) - log(sigma.sq) + # log transformation
+        logprior_sigma.sq(sigma.sq_star) - logprior_sigma.sq(sigma.sq) + # uniform prior on rho
+        logweights_star - logweights
+    }
+    
+    
+    
     if(log(runif(1)) < acc_ratio){
       sigma.sq = sigma.sq_star; sigma.sq_trans = log(sigma.sq)
-      Vuinv_chol = chol(1/sigma.sq*Q + spam::diag.spam(kappa, n, n))
-
+      phi = phi_star
+      if(!phi_fixed) phi_trans = glogit(phi, xmin = phi_lb, xmax = phi_ub)
+      Q = Q_star
+      logdetQ = logdetQ_star
+      QplusKappachol = QplusKappachol_star
+      #Vuinv_chol = chol(1/sigma.sq*Q + spam::diag.spam(kappa, n, n))
       acc_save[imcmc] = 1
-      logweights = logweights_star
     }
-
+    
     # mut and Ct are recursively updated
-
-    if(imcmc == 1){
-      mut = sigma.sq_trans
-      Ct = MH_s_d*MH_eps
+    # mut and Ct are recursively updated
+    if(!phi_fixed){
+      if(imcmc == 1){
+        mut = c(sigma.sq_trans, phi_trans)
+        Ct = MH_s_d*MH_eps*diag(2)
+      }else{
+        tmpmu = (mut*(imcmc-1)+c(sigma.sq_trans, phi_trans))/imcmc
+        # eq (3) of Haario et al. 2001
+        Ct = (imcmc-1)*Ct/imcmc+MH_s_d/imcmc*(imcmc*tcrossprod(mut)-
+                                                (imcmc+1)*tcrossprod(tmpmu) +
+                                                tcrossprod(c(sigma.sq_trans, phi_trans))+
+                                                MH_eps*diag(2))
+        mut = tmpmu
+      }
     }else{
-      tmpmu = (mut*(imcmc-1)+sigma.sq_trans)/imcmc
-      # eq (3) of Haario et al. 2001
-      Ct = (imcmc-1)*Ct/imcmc+MH_s_d/imcmc*(imcmc*tcrossprod(mut)-
-                                              (imcmc+1)*tcrossprod(tmpmu) +
-                                              tcrossprod(sigma.sq_trans)+
-                                              MH_eps)
-      mut = tmpmu
+      if(imcmc == 1){
+        mut = sigma.sq_trans
+        Ct = MH_s_d*MH_eps
+      }else{
+        tmpmu = (mut*(imcmc-1)+sigma.sq_trans)/imcmc
+        # eq (3) of Haario et al. 2001
+        Ct = (imcmc-1)*Ct/imcmc+MH_s_d/imcmc*(imcmc*tcrossprod(mut)-
+                                                (imcmc+1)*tcrossprod(tmpmu) +
+                                                tcrossprod(sigma.sq_trans)+
+                                                MH_eps)
+        mut = tmpmu
+      }
     }
-
-    Vuinv = 1/sigma.sq*Q + spam::diag.spam(kappa, n, n) #diag(kappa, nrow = n, ncol = n) # same as t(D)%*%diag(omega)%*%D
+    
+    
+    #Vuinv = Q + spam::diag.spam(kappa, n, n) #diag(kappa, nrow = n, ncol = n) # same as t(D)%*%diag(omega)%*%D
     #b_u = (lambda *(y-0.5) - kappa*Xbeta)
     #u = as.numeric(spam::rmvnorm.canonical(1, b_u, Vuinv))
-
+    
     b_u = (lambda *(y-0.5) - kappa*Xbeta)
     # Rstruct reduce time a lot
-    u = as.numeric(spam::rmvnorm.canonical(1, b_u, Vuinv, Rstruct = Q_spamstruct))
-    #
-    # # Alg 2.5 of Rue book
-    # mutemp = forwardsolve(Vuinv_chol, forwardsolve(Vuinv_chol, b_u, transpose = T))
-    # u = mutemp +forwardsolve(Vuinv_chol, rnorm(n))
-
+    #u = as.numeric(spam::rmvnorm.canonical(1, b_u, Vuinv))
+    #u = as.numeric(spam::rmvnorm.canonical(1, b_u, Vuinv, Rstruct = Q_spamstruct))
+    
+    mu <- as.numeric(solve.spam(QplusKappachol, b_u))
+    u = mu + as.numeric(spam::backsolve(QplusKappachol, rnorm(n)))
+    
     #sample psi
     psi = rbeta(1, psi_ab[1] + 2*n, psi_ab[2] - n + sum(lambda))
 

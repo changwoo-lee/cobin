@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# cobinreg
+# cobin: R package for continuous binomial (cobin) regression and extensions
 
 <!-- badges: start -->
 <!-- badges: end -->
@@ -11,7 +11,9 @@ mixed model; GP: Gaussian process; NNGP: nearest neighbor Gaussian
 process; cobin: continuous binomial; micobin: mixture of continuous
 binomial;
 
-**Basic functions**
+## Code structure
+
+### Basic functions
 
 - cobin.R:
   - `dcobin(x, theta, lambda)`: Density of
@@ -24,7 +26,7 @@ binomial;
   - `rmicobin(n, theta, psi)`: Random variate generation from
     $\mathrm{micobin}(\theta, \psi)$
 
-**Cobin / Micobin regression (Bayesian, cobit link)**
+### Cobin / Micobin regression (Bayesian, cobit link)
 
 - cobinreg.R:
   - `cobinreg()`: fit Bayesian cobin GLM or GLMM
@@ -35,7 +37,7 @@ binomial;
   - └── fit_micobin_fixedeffect.R: backend function for micobin GLM
   - └── fit_micobin_mixedeffect.R: backend function for micobin GLMM
 
-**Spatial cobin / micobin regression (Bayesian, cobit link)**
+### Spatial cobin / micobin regression (Bayesian, cobit link)
 
 - spcobinreg.R:
   - `cobinreg()`: fit spatial cobin regresson
@@ -48,7 +50,7 @@ binomial;
   - └── fit_micobin_spatial_NNGP.R: backend function with NNGP random
     effect
 
-**Helper functions**
+### Helper functions
 
 - CB.R:
   - `qcb()`, `rcb()`: quantile and random variate generation of
@@ -69,7 +71,7 @@ binomial;
   - `cobinfamily()`: a list of functions and expressions needed to fit
     cobin GLM
 
-**cobin regression (non-Bayesian)**
+### cobin regression (non-Bayesian)
 
 - glm.cobin.R:
   - `glm.cobin()`: fit cobin GLM using iteratively reweighted least
