@@ -55,8 +55,9 @@ cobinreg <- function(formula, data, link = "cobit", contrasts = NULL,
     priors$beta_scale = 2.5
   }
   if(is.null(priors$lambda_grid)){
-    priors$lambda_grid = 1:70
+    priors$lambda_grid = 1:70; 
   }
+  lambda_grid = priors$lambda_grid;
   if(is.null(priors$lambda_prior)){
     priors$lambda_logprior = log(lambda_grid) + lfactorial(lambda_grid) - lfactorial(lambda_grid+4) + log(36)
   }
