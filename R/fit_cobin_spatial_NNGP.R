@@ -254,7 +254,7 @@ fit_cobin_spatial_NNGP <- function(y, X, coords, distmat, priors, ord = ord, Nli
     #u = as.numeric(spam::rmvnorm.canonical(1, b_u, Vuinv))
     #u = as.numeric(spam::rmvnorm.canonical(1, b_u, Vuinv, Rstruct = Q_spamstruct))
      
-    mu <- as.numeric(solve.spam(QplusKappachol, b_u))
+    mu <- as.numeric(spam::solve.spam(QplusKappachol, b_u))
     u = mu + as.numeric(spam::backsolve(QplusKappachol, rnorm(n)))
     # # Alg 2.5 of Rue book
     # mutemp = forwardsolve(Vuinv_chol, forwardsolve(Vuinv_chol, b_u, transpose = T))

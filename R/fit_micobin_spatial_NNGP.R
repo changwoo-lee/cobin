@@ -253,7 +253,7 @@ fit_micobin_spatial_NNGP <- function(y, X, coords, distmat, priors, ord = ord, N
     #u = as.numeric(spam::rmvnorm.canonical(1, b_u, Vuinv))
     #u = as.numeric(spam::rmvnorm.canonical(1, b_u, Vuinv, Rstruct = Q_spamstruct))
     
-    mu <- as.numeric(solve.spam(QplusKappachol, b_u))
+    mu <- as.numeric(spam::solve.spam(QplusKappachol, b_u))
     u = mu + as.numeric(spam::backsolve(QplusKappachol, rnorm(n)))
     
     #sample psi

@@ -87,9 +87,160 @@ dcobin <- function(x, theta, lambda, log = FALSE){
 
 
 
+#' Cumulative distribution function of cobin (continuous binomial) distribution
+#'
+#' @param q num (length n), between 0 and 1, evaluation point
+#' @param theta num 1, canonical parameter
+#' @param lambda integer, inverse of dispersion parameter
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+pcobin <- function(q, theta, lambda){
+  if(length(lambda)!=1) stop("lambda must be scalar")
+  # check lambda is integer
+  if(lambda %% 1 != 0){
+    stop("lambda must be integer")
+  }
+  if(lambda == 1) return(pcb(q, theta))
+  if(length(theta)!=1) stop("theta must be scalar")
+  # check x is between 0 and 1
+  if(any(q < 0 | q > 1)){
+    stop("q must be between 0 and 1")
+  }
 
+  if(theta < 0){
+    out = pcobin_negtheta(q, theta, lambda)
+  }else if(theta == 0){
+    # to imporve numerical stability
+    idx1 = which(q <= 0.5)
+    idx2 = which(q > 0.5)
+    out = rep(0, length(q))
+    if(length(idx1) > 0) out[idx1] = pIH01(q[idx1], lambda)
+    if(length(idx2) > 0) out[idx2] = 1 - pIH01(1-q[idx2], lambda)
+  }else{
+    out = 1-pcobin_negtheta(1-q, -theta, lambda)
+  }
+  return(pmax(0, out))
+}
 
+pIH01 <- function(q, lambda, log = F){
+  n = length(q)
+  logsummand_mat = matrix(0, lambda+1, n)
+  common = log(lambda) - lfactorial(lambda-1) + lchoose(lambda, 0:lambda) 
+  for(i in 1:n){
+    temp = lambda*q[i] - (0:lambda)
+    zeroidx = which(temp <= 0)
+    nonzeroidx = which(temp > 0)
+    logsummand_mat[zeroidx,i] = -Inf
+    logsummand_mat[nonzeroidx,i] = common[nonzeroidx] + lambda*log(temp[nonzeroidx]) - 2*log(lambda)
+  }
+  signs = (-1)^(0:lambda)
+  logsums_positive = matrixStats::colLogSumExps(logsummand_mat[signs == 1,, drop = F])
+  logsums_negative = matrixStats::colLogSumExps(logsummand_mat[signs == -1,, drop = F])
+  if(any(logsums_positive < logsums_negative)){
+    warning("numerical error, return 0 density value")
+    logsums_positive = logsums_negative + pmax(logsums_positive-logsums_negative, 0)
+    
+    logcdf = logsums_positive + log1p(-exp(logsums_negative-logsums_positive)) # log-minus-exp
+  }else{
+    logcdf = logsums_positive + log1p(-exp(logsums_negative-logsums_positive)) # log-minus-exp
+  }
+  idxnan = which(is.nan(logcdf))
+  logcdf[idxnan] = -Inf
+  if(log){
+    return(logcdf)
+  }else{
+    return(exp(logcdf))
+  }
+}
 
+pcobin_negtheta <- function(q, theta, lambda, log = F){
+  n = length(q)
+  logsummand_mat = matrix(0, lambda+1, n)
+  common = log(lambda) - lfactorial(lambda-1) + lchoose(lambda, 0:lambda) - lambda*bft(theta)
+  for(i in 1:n){
+    temp = lambda*q[i] - (0:lambda)
+    zeroidx = which(temp <= 0)
+    nonzeroidx = which(temp > 0)
+    logsummand_mat[zeroidx,i] = -Inf
+    #term1 = pgamma( - theta * (lambda * q[i] - (0:lambda)[nonzeroidx]), lambda)*gamma(lambda) # only valid when theta < 0 
+    #term2 = pgamma( - theta * (lambda * (0:lambda)[nonzeroidx]/lambda - (0:lambda)[nonzeroidx]), lambda)*gamma(lambda) # only valid when theta < 0 
+    #logsummand_mat[nonzeroidx,i] = common[nonzeroidx] + theta*(0:lambda)[nonzeroidx] - log(lambda) + log((term1 - term2)/abs(theta)^lambda)
+    logterm1 = pgamma( - theta * (lambda * q[i] - (0:lambda)[nonzeroidx]), lambda, log.p = TRUE)#*gamma(lambda) # only valid when theta < 0 
+    #term2 = pgamma( - theta * (lambda * (0:lambda)[nonzeroidx]/lambda - (0:lambda)[nonzeroidx]), lambda)#*gamma(lambda) # only valid when theta < 0 
+    logsummand_mat[nonzeroidx,i] = common[nonzeroidx] + theta*(0:lambda)[nonzeroidx] - log(lambda) + lgamma(lambda) + logterm1 - lambda*log(abs(theta))
+  }
+  signs = (-1)^(0:lambda)
+  logsums_positive = matrixStats::colLogSumExps(logsummand_mat[signs == 1,, drop = F])
+  logsums_negative = matrixStats::colLogSumExps(logsummand_mat[signs == -1,, drop = F])
+  if(any(logsums_positive < logsums_negative)){
+    warning("numerical error, return 0 density value")
+    logsums_positive = logsums_negative + pmax(logsums_positive-logsums_negative, 0)
+    
+    logcdf = logsums_positive + log1p(-exp(logsums_negative-logsums_positive)) # log-minus-exp
+  }else{
+    logcdf = logsums_positive + log1p(-exp(logsums_negative-logsums_positive)) # log-minus-exp
+  }
+  idxnan = which(is.nan(logcdf))
+  logcdf[idxnan] = -Inf
+  if(log){
+    return(logcdf)
+  }else{
+    return(exp(logcdf))
+  }
+}
+# 
+# pcobin_hypergeometric <- function(q, theta, lambda, log = F){
+#   n = length(q)
+#   logsummand_mat = matrix(0, lambda+1, n)
+#   common = log(lambda) - lfactorial(lambda-1) + lchoose(lambda, 0:lambda) - lambda*bft(theta)
+#   for(i in 1:n){
+#     temp = lambda*q[i] - (0:lambda)
+#     zeroidx = which(temp <= 0)
+#     nonzeroidx = which(temp > 0)
+#     logsummand_mat[zeroidx,i] = -Inf
+#     #term1 = pgamma( - theta * (lambda * q[i] - (0:lambda)[nonzeroidx]), lambda)*gamma(lambda) # only valid when theta < 0 
+#     #term2 = pgamma( - theta * (lambda * (0:lambda)[nonzeroidx]/lambda - (0:lambda)[nonzeroidx]), lambda)*gamma(lambda) # only valid when theta < 0 
+#     #logsummand_mat[nonzeroidx,i] = common[nonzeroidx] + theta*(0:lambda)[nonzeroidx] - log(lambda) + log((term1 - term2)/abs(theta)^lambda)
+#     term1 = gsl::hyperg_1F1(lambda, lambda + 1, theta*temp[nonzeroidx]) # only valid when theta < 0
+#     logsummand_mat[nonzeroidx,i] = common[nonzeroidx] + theta*(0:lambda)[nonzeroidx] - 2*log(lambda) + lambda*log(temp[nonzeroidx]) + log(term1)
+#   }
+#   signs = (-1)^(0:lambda)
+#   logsums_positive = matrixStats::colLogSumExps(logsummand_mat[signs == 1,, drop = F])
+#   logsums_negative = matrixStats::colLogSumExps(logsummand_mat[signs == -1,, drop = F])
+#   if(any(logsums_positive < logsums_negative)){
+#     warning("numerical error, return 0 density value")
+#     logsums_positive = logsums_negative + pmax(logsums_positive-logsums_negative, 0)
+#     
+#     logcdf = logsums_positive + log1p(-exp(logsums_negative-logsums_positive)) # log-minus-exp
+#   }else{
+#     logcdf = logsums_positive + log1p(-exp(logsums_negative-logsums_positive)) # log-minus-exp
+#   }
+#   idxnan = which(is.nan(logcdf))
+#   logcdf[idxnan] = -Inf
+#   if(log){
+#     return(logcdf)
+#   }else{
+#     return(exp(logcdf))
+#   }
+# }
+
+pcobin_numerical <- function(q, theta, lambda) {
+  sapply(q, function(q_val) {
+    integrate(dcobin, 0, q_val, theta, lambda)$value
+  })
+}
+
+#check
+# q = seq(0.0001, 0.9999, length = 5)
+# theta = 1
+# lambda = 50
+# pcobin(q, theta, lambda)
+# pcobin_hypergeometric(q, theta, lambda)
+# pcobin_numerical(q, theta, lambda)
+# 
 ecobin <- function(theta){
   bftprime(theta)
 }
@@ -97,3 +248,4 @@ ecobin <- function(theta){
 vcobin <- function(theta, lambda){
   bftprimeprime(theta)/lambda
 }
+

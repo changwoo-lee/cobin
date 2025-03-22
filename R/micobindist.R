@@ -49,9 +49,15 @@ rmicobin <- function(n, theta, psi, r = 2){
 #'
 #' @examples
 dmicobin <- function(x, theta, psi, r = 2, log = FALSE, l_max = 70){
-  # ensure length of ththeta, r, q are all 1
-  if(length(r) != 1 | length(psi) != 1){
-    stop("ththeta, r, q must be scalar")
+  if(length(psi) != 1){
+    stop("psi must be scalar")
+  }
+  if(length(theta) == 1){
+    theta = rep(theta, length(x))
+  }
+  # ensure legnth of theta is also n; if scalar, convert it to rep(theta, n)
+  if(length(theta) != length(x)){
+    stop("theta must be scalar or same as length of x")
   }
   logdensity_summand = matrix(-Inf, l_max, length(x))
   error = (1-pnbinom(l_max-1, r, psi, log = FALSE))
@@ -67,6 +73,34 @@ dmicobin <- function(x, theta, psi, r = 2, log = FALSE, l_max = 70){
   }
 }
 
+
+pmicobin <- function(q, theta, psi, r = 2, l_max = 70){
+  if(length(psi) != 1){
+    stop("psi must be scalar")
+  }
+  if(length(theta) != 1){
+    stop("theta must be scalar")
+  }
+  logcdf_summand = matrix(-Inf, l_max, length(q))
+  for(l in 1:l_max){
+    logcdf_summand[l,] = dnbinom(l - 1, r, psi, log = T) + log(pcobin(q, theta, l))
+  }
+  logcdf = matrixStats::colLogSumExps(logcdf_summand)
+  return(exp(logcdf))
+}
+
+# xgrid = seq(0.0001, 0.9999, length.out = 200)
+# theta  = 5
+# psi = 0.2
+# draws = rcobin(10000, theta, 5)
+# hist(draws)
+# plot(ecdf(draws))
+# lines(xgrid, pcobin(xgrid, theta, 5), col = 2); abline(v=0); abline(v=1)
+# 
+# draws = rmicobin(10000, theta, psi)
+# hist(draws)
+# plot(ecdf(draws))
+# lines(xgrid, pmicobin(xgrid, theta, psi), col = 2); abline(v=0); abline(v=1)
 
 emicobin <- function(eta){
   bftprime(eta)

@@ -39,6 +39,27 @@ qcb <- function(p, theta){
   return(out)
 }
 
+#' Title
+#'
+#' @param q 
+#' @param theta 
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+pcb <- function(q, theta){
+  theta = array(theta,length(q))
+  zeroidx = which(abs(theta) < 1e-12)
+  nonzeroidx = which((abs(theta) >= 1e-12) & (theta < 500))
+  bigidx = which(theta >= 500)
+  out = numeric(length(q))
+  out[zeroidx] = q[zeroidx]
+  out[nonzeroidx] = expm1(theta[nonzeroidx] * q[nonzeroidx])/expm1(theta[nonzeroidx])
+  out[bigidx] = exp(theta[bigidx]*(q[bigidx] - 1))
+  return(out)
+}
+
 # random variate generation of continuous Bernoulli (continuous binomial with lambda = 1)
 rcb <- function(n, theta){
   return(qcb(p = runif(n), theta))

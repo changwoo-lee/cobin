@@ -84,20 +84,35 @@ cobinreg <- function(formula, data, link = "cobit", contrasts = NULL,
   return(out)
 }
 
-#
-# source("r/cobin.r")
-#Example 1
-# n = 1000
-# p = 3
-# X = matrix(rnorm(n*p), n, p)
-# beta = c(0, 3, -3) # without intercept
-# y = rcobin(n, X%*%beta, rep(10, n))
+# #
+# #Example 1
+# n = 2000
+# p = 2
+# X = matrix(rnorm(n*p, 0, sd = 3), n, p)
+# 
+# X = mvnfast::rmvn(n, rep(0, 2), 9*matrix(c(1, 0.9,
+#                                          0.9, 1), 2, 2))
+# 
+# beta = c(0, 1) 
+# y = rcobin(n, X%*%beta, rep(5, n))
 # 
 # df = data.frame(y = y, X = X)
-# out1 = cobinreg(y ~ X, data = df, nburn = 1000, nsave = 1000)
-# out2 = cobinreg(y ~ X, data = df, MH = T, nburn = 1000, nsave = 1000, nthin = 1)
+# out1 = cobinreg(y ~ X, data = df, nburn = 1000, nsave = 10000)
+# out2 = cobinreg(y ~ X, data = df, MH = T, nburn = 1000, nsave = 10000, nthin = 1)
+# 
+# plot(out2$acc_save)
+# 
+# str(out1$post_save)
+# mcmcse::multiESS(out1$post_save[,1:3])/as.numeric(out1$t_mcmc)
+# #plot(out1$post_save)
+# mcmcse::multiESS(out2$post_save[,1:3])/as.numeric(out2$t_mcmc)
+# #plot(out2$post_save)
+# 
 # coda::effectiveSize(out1$post_save)/as.numeric(out1$t_mcmc)
 # coda::effectiveSize(out2$post_save)/as.numeric(out2$t_mcmc)
+# 
+# 
+# 
 # 
 # 
 # 
@@ -119,10 +134,10 @@ cobinreg <- function(formula, data, link = "cobit", contrasts = NULL,
 # 
 # 
 # mean(out2$acc_save[1001:10000])
-#
-#
+# 
+# 
 # # example 2: random intercept model
-#
+# 
 # # Define parameters
 # n <- 1000
 # p <- 3
@@ -152,9 +167,9 @@ cobinreg <- function(formula, data, link = "cobit", contrasts = NULL,
 # u
 # bayesplot::mcmc_trace(out$post_save)
 # bayesplot::mcmc_trace(out$post_u_save)
-#
-#
-#
-#
+# 
+# #
+# #
+# #
 
 
