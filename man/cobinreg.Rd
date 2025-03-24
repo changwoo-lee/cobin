@@ -13,7 +13,8 @@ cobinreg(
   nburn = 1000,
   nsave = 1000,
   nthin = 1,
-  MH = F
+  MH = F,
+  lambda_fixed = NULL
 )
 }
 \description{
