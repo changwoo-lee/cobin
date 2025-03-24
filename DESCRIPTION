@@ -1,6 +1,6 @@
 Package: cobin
 Title: continuous binomial regression
-Version: 0.0.1.1
+Version: 0.0.1.3
 Authors@R: 
     person("Changwoo", "Lee", , "first.last@example.com", role = c("aut", "cre"))
 Description: What the package does (one paragraph).

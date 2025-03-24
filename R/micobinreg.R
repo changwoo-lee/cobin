@@ -65,9 +65,6 @@ micobinreg <- function(formula, data, link = "cobit", contrasts = NULL,
     priors$psi_ab = c(2,2)
   }
 
-  if(any(y == 0) || any(y == 1)){
-    if(priors$lambdagrid != 1) stop("y must be strictly between 0 and 1, unless lambda is fixed as 1")
-  }
   if(isZ){
     if(is.null(priors$a_u)) priors$a_u = 1
     if(is.null(priors$b_u)) priors$b_u = 1

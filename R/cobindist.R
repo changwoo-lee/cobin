@@ -70,13 +70,17 @@ rcobin <- function(n, theta, lambda){
 #' 
 dcobin <- function(x, theta, lambda, log = FALSE){
   n = length(x)
-  if(length(theta) == 1){
-    theta = rep(theta, n)
+  if(length(theta) == 1) theta = rep(theta, n)
+  if(length(lambda) == 1) lambda = rep(lambda, n)
+  if(any(lambda > 80)){
+    warning("density calculation with lambda > 80 is highly instable")
   }
-  # length of lambda must be 1
-  if(length(theta) != n | length(lambda) != 1){
-    stop("length of theta should be either 1 or length of x, and leegnth of lambda must be 1")
-  }
+  stopifnot("length of theta should be either 1 or length(x)" = (length(theta) == length(x)))
+  stopifnot("length of lambda should be either 1 or length(x)" = (length(lambda) == length(x)))
+  # # length of lambda must be 1
+  # if(length(theta) != n | length(lambda) != 1){
+  #   stop("length of theta should be either 1 or length of x, and leegnth of lambda must be 1")
+  # }
   logdensity = log(lambda) + dIH(lambda*x, lambda, log = T) + lambda*theta*x - lambda*bft(theta)
   if(log){
     return(logdensity)
@@ -109,7 +113,13 @@ pcobin <- function(q, theta, lambda){
   if(any(q < 0 | q > 1)){
     stop("q must be between 0 and 1")
   }
-
+  # numerical integration for lambda > 40
+  if(lambda > 40 & lambda <= 60){
+    return(pcobin_numerical(q, theta, lambda))
+  }else if(lambda > 60){
+    warning("normal cdf approximation used for lambda > 60 due to numerical stability")
+    return(pnorm(q, mean = cobin::bftprime(theta), sd = sqrt(cobin:::vcobin(theta,lambda))))
+  }
   if(theta < 0){
     out = pcobin_negtheta(q, theta, lambda)
   }else if(theta == 0){
@@ -122,7 +132,7 @@ pcobin <- function(q, theta, lambda){
   }else{
     out = 1-pcobin_negtheta(1-q, -theta, lambda)
   }
-  return(pmax(0, out))
+  return(pmin(pmax(0, out), 1))
 }
 
 pIH01 <- function(q, lambda, log = F){
@@ -156,6 +166,30 @@ pIH01 <- function(q, lambda, log = F){
   }
 }
 
+pcobin_negtheta2 <- function(q, theta, lambda, log = F){
+  n = length(q)
+  summand_mat = matrix(0, lambda+1, n)
+  common = log(lambda) + lchoose(lambda, 0:lambda) - lambda*bft(theta)
+  for(i in 1:n){
+    temp = lambda*q[i] - (0:lambda)
+    zeroidx = which(temp <= 0)
+    nonzeroidx = which(temp > 0)
+    summand_mat[zeroidx,i] = 0
+    # https://dl.acm.org/doi/10.1145/2972951#supplementary-materials
+    # lower incomplete gamma function in R is only supported by positive argument; (unless using gsl::hyperg_1F1 which is numerically instable)
+    # currently, lambda > 40 cause numerical issues. we can apply same trick of pIH (symmetry) to avoid this issue if lower incomplete gamma can be evaluated in negative domain
+    #term1 = pgamma( - theta * (lambda * q[i] - (0:lambda)[nonzeroidx]), lambda)#*gamma(lambda) # only valid when theta < 0 
+    logterm1 = pgamma( - theta * (lambda * q[i] - (0:lambda)[nonzeroidx]), lambda, log.p = TRUE)#*gamma(lambda) # only valid when theta < 0 
+    
+    #term2 = pgamma( - theta * (lambda * (0:lambda)[nonzeroidx]/lambda - (0:lambda)[nonzeroidx]), lambda)#*gamma(lambda) # only valid when theta < 0 
+    #summand_mat[nonzeroidx,i] = exp(common[nonzeroidx])*exp(theta*(0:lambda)[nonzeroidx])/(lambda)*term1/abs(theta)^lambda
+    summand_mat[nonzeroidx,i] = exp(common[nonzeroidx] + theta*(0:lambda)[nonzeroidx] - log(lambda) + logterm1 - lambda*log(abs(theta)))
+  }
+  signs = (-1)^(0:lambda)
+  #browser()
+  return(colSums(summand_mat*signs))
+}
+
 pcobin_negtheta <- function(q, theta, lambda, log = F){
   n = length(q)
   logsummand_mat = matrix(0, lambda+1, n)
@@ -165,6 +199,10 @@ pcobin_negtheta <- function(q, theta, lambda, log = F){
     zeroidx = which(temp <= 0)
     nonzeroidx = which(temp > 0)
     logsummand_mat[zeroidx,i] = -Inf
+    # https://dl.acm.org/doi/10.1145/2972951#supplementary-materials
+    # lower incomplete gamma function in R is only supported by positive argument; (unless using gsl::hyperg_1F1 which is numerically instable)
+    # currently, lambda > 40 cause numerical issues. we can apply same trick of pIH (symmetry) to avoid this issue if lower incomplete gamma can be evaluated in negative domain
+    
     #term1 = pgamma( - theta * (lambda * q[i] - (0:lambda)[nonzeroidx]), lambda)*gamma(lambda) # only valid when theta < 0 
     #term2 = pgamma( - theta * (lambda * (0:lambda)[nonzeroidx]/lambda - (0:lambda)[nonzeroidx]), lambda)*gamma(lambda) # only valid when theta < 0 
     #logsummand_mat[nonzeroidx,i] = common[nonzeroidx] + theta*(0:lambda)[nonzeroidx] - log(lambda) + log((term1 - term2)/abs(theta)^lambda)
@@ -191,6 +229,8 @@ pcobin_negtheta <- function(q, theta, lambda, log = F){
     return(exp(logcdf))
   }
 }
+
+
 # 
 # pcobin_hypergeometric <- function(q, theta, lambda, log = F){
 #   n = length(q)
@@ -229,7 +269,7 @@ pcobin_negtheta <- function(q, theta, lambda, log = F){
 
 pcobin_numerical <- function(q, theta, lambda) {
   sapply(q, function(q_val) {
-    integrate(dcobin, 0, q_val, theta, lambda)$value
+    integrate(dcobin, 0, q_val, theta, lambda, subdivisions = 1000L)$value
   })
 }
 
