@@ -23,7 +23,7 @@
 micobinreg <- function(formula, data, link = "cobit", contrasts = NULL,
                      priors = list(beta_intercept_scale = 10,
                                    beta_scale = 2.5, beta_df = Inf),
-                     nburn = 1000, nsave = 1000, nthin = 1){
+                     nburn = 1000, nsave = 1000, nthin = 1, psi_fixed = NULL){
   if(link != "cobit") stop("only supports cobit link")
 
   isZ = length(lme4::findbars(formula)) > 0
@@ -69,7 +69,11 @@ micobinreg <- function(formula, data, link = "cobit", contrasts = NULL,
     if(is.null(priors$a_u)) priors$a_u = 1
     if(is.null(priors$b_u)) priors$b_u = 1
   }
-
+  if(!is.null(psi_fixed)){
+    if(isZ) stop("psi_fixed is not supported for mixed effect models")
+    return(fit_micobin_fixedeffect_psifixed(y = y, X = X, priors = priors,
+                                             nburn = nburn, nsave = nsave, nthin = nthin, psi_fixed = psi_fixed))
+  }
   if(!isZ){
     out = fit_micobin_fixedeffect(y = y, X = X, priors = priors,
                              nburn = nburn, nsave = nsave, nthin = nthin)
