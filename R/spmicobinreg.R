@@ -120,10 +120,14 @@ spmicobinreg <- function(formula, data, link = "cobit",
     out = fit_micobin_spatial(y = y, X = X, coords = coords, distmat = distmat,
                             priors = priors,
                             nburn = nburn, nsave = nsave, nthin = nthin)
+    out$coords = coords
   }else{
     out = fit_micobin_spatial_NNGP(y = y, X = X, coords = coords, distmat = distmat,
                                  priors = priors, ord = ord, Nlist = Nlist,
                                  nburn = nburn, nsave = nsave, nthin = nthin)
+    out$coords = coords
+    out$nngp.control = nngp.control
+    out$spNNGPfit = spNNGPfit # for prediction in the future
   }
   return(out)
 }
