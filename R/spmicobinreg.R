@@ -90,7 +90,7 @@ spmicobinreg <- function(formula, data, link = "cobit",
 
     ybinary = as.numeric(y > 0.5)
     print("running prelim spNNGP")
-    spNNGPfit = spNNGP(ybinary ~ X, data = data, coords = coords,
+    spNNGPfit = spNNGP(formula, data = data, coords = coords,
                        method = "latent", family = "binomial", # this is not important
                        n.neighbors = nngp.control$n.neighbors,
                        starting=nngpstarting, tuning=nngptuning,

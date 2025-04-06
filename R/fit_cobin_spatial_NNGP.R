@@ -269,7 +269,8 @@ fit_cobin_spatial_NNGP <- function(y, X, coords, distmat, priors, ord = ord, Nli
       sigma.sq_save[isave,] = sigma.sq
       phi_save[isave,] = phi
       lambda_save[isave,] = lambda
-      loglik_save[isave,] = as.numeric(logh_grid[,which(lambda==lambda_grid)] + lambda*Xbeta*y - lambda*bft(Xbeta))
+      linpred = Xbeta + u
+      loglik_save[isave,] = as.numeric(logh_grid[,which(lambda==lambda_grid)] + lambda*linpred*y - lambda*bft(linpred))
       isave = isave + 1
     }
   }
