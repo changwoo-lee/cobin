@@ -1,29 +1,5 @@
 
-#' Quantile function of continuous Bernoulli (continuous binomial with lambda = 1)
-#'
-#' Continuous Bernoulli distribution with parameter theta has a density function
-#' f(y; theta) = theta/(e^theta-1) * e^(theta * y)
-#' or equivalently, with phi = e^theta/(1+e^theta),
-#' f(y; phi) \propto phi^y * (1-phi)^(1-y)
-#'
-#' Its quantile function is
-#'
-#' log((exp(theta)-1)*p+1)/theta
-#'
-#' below codes evalualtes in a numerically stable way
-#'
-#' @param p length n vector, probabilities
-#' @param theta scalar or length n vector, theta
-#'
-#' @returns length n vector of quantiles
-#' @export
-#'
-#' @examples
-#'
-#' pgrid = seq(0.001, 0.999, length = 1000)
-#' plot(pgrid, qcb(pgrid, 0)) # quantile function of uniform
-#' plot(pgrid, qcb(pgrid, 3)) #
-#'
+# inverse cdf of continuous Bernoulli (continuous binomial with lambda = 1)
 qcb <- function(p, theta){
   if(length(p) != length(theta) & length(theta) != 1 ){
     stop("length of p and theta must be the same, or theta has length 1")
@@ -39,15 +15,7 @@ qcb <- function(p, theta){
   return(out)
 }
 
-#' Title
-#'
-#' @param q 
-#' @param theta 
-#'
-#' @returns
-#' @export
-#'
-#' @examples
+# cdf of continuous Bernoulli (continuous binomial with lambda = 1)
 pcb <- function(q, theta){
   theta = array(theta,length(q))
   zeroidx = which(abs(theta) < 1e-12)

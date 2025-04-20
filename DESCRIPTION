@@ -1,6 +1,6 @@
 Package: cobin
 Title: continuous binomial regression
-Version: 0.0.1.6
+Version: 0.0.1.7
 Authors@R: 
     person("Changwoo", "Lee", , "first.last@example.com", role = c("aut", "cre"))
 Description: What the package does (one paragraph).
@@ -13,6 +13,7 @@ LinkingTo:
 Imports: 
     lme4,
     Matrix,
+    matrixStats,
     Rcpp,
     spam,
     spNNGP

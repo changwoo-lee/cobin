@@ -4,9 +4,6 @@
 #' @param Weight n by K matrix, each row corresponds to unnormalized probabilities of sampling weights
 #'
 #' @return integers with length n, each element in {1,...,K}
-#' @export
-#'
-#' @examples
 sample.rowwise <- function(Weight) {
   x <- runif(nrow(Weight))
   cumul.w <- Weight %*% upper.tri(diag(ncol(Weight)), diag = TRUE)/rowSums(Weight)

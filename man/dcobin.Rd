@@ -9,14 +9,25 @@ dcobin(x, theta, lambda, log = FALSE)
 \arguments{
 \item{x}{num (length n), between 0 and 1, evaluation point}
 
-\item{theta}{num (length 1 or n), canonical parameter}
+\item{theta}{scalar or length n vector, num (length 1 or n), natural parameter}
 
-\item{lambda}{integer, inverse of dispersion parameter}
+\item{lambda}{scalar or length n vector, integer, inverse of dispersion parameter}
 
-\item{log}{logical, return log density?}
+\item{log}{logical (Default FALSE), if TRUE, return log density}
+}
+\value{
+density of \eqn{cobin(\theta,\lambda^{-1})}
 }
 \description{
-Density function of cobin (continuous binomial) distribution
+Continuous binomial distribution with natural parameter \eqn{\theta} and dispersion parameter \eqn{1/\lambda}, in short \eqn{Y \sim cobin(\theta, \lambda^{-1})}, has density
+\deqn{
+ p(y; \theta, \lambda^{-1}) = h(y;\lambda) \exp(\lambda \theta y - \lambda B(\theta)), \quad 0 \le y \le 1
+}
+where \eqn{B(\theta) = \log\{(e^\theta - 1)/\theta\}} and \eqn{h(y;\lambda) = \frac{\lambda}{(\lambda-1)!}\sum_{k=0}^{\lambda} (-1)^k {\lambda \choose k} \max(0,\lambda y-k)^{\lambda-1}}.
+When \eqn{\lambda = 1}, it becomes continuous Bernoulli distribution.
+}
+\details{
+For the evaluation of \eqn{h(y;\lambda)}, see \code{?cobin::dIH}.
 }
 \examples{
 

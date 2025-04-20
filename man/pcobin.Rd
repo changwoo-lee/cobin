@@ -9,10 +9,26 @@ pcobin(q, theta, lambda)
 \arguments{
 \item{q}{num (length n), between 0 and 1, evaluation point}
 
-\item{theta}{num 1, canonical parameter}
+\item{theta}{scalar, natural parameter}
 
 \item{lambda}{integer, inverse of dispersion parameter}
 }
+\value{
+c.d.f. of \eqn{cobin(\theta,\lambda^{-1})}
+}
 \description{
-Cumulative distribution function of cobin (continuous binomial) distribution
+Continuous binomial distribution with natural parameter \eqn{\theta} and dispersion parameter \eqn{1/\lambda}, in short \eqn{Y \sim cobin(\theta, \lambda^{-1})}, has density
+\deqn{
+ p(y; \theta, \lambda^{-1}) = h(y;\lambda) \exp(\lambda \theta y - \lambda B(\theta)), \quad 0 \le y \le 1
+}
+where \eqn{B(\theta) = \log\{(e^\theta - 1)/\theta\}} and \eqn{h(y;\lambda) = \frac{\lambda}{(\lambda-1)!}\sum_{k=0}^{\lambda} (-1)^k {\lambda \choose k} \max(0,\lambda y-k)^{\lambda-1}}.
+When \eqn{\lambda = 1}, it becomes continuous Bernoulli distribution.
+}
+\examples{
+
+xgrid = seq(0, 1, length = 500)
+out = pcobin(xgrid, 1, 2)
+plot(ecdf(rcobin(10000, 1, 2)))
+lines(xgrid, out, col = 2)
+
 }

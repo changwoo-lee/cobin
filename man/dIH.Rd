@@ -7,23 +7,30 @@
 dIH(x, m, log = F)
 }
 \arguments{
-\item{x}{num(length n), between 0 and m, evaluation point}
+\item{x}{vector of quantities, between 0 and m}
 
 \item{m}{integer, parameter}
 
 \item{log}{logical, return log density if TRUE}
 }
 \value{
-density value at x
+(log) density evaluated at x
 }
 \description{
-Irwin-Hall distribution with parameter m is defined as a sum of m uniform (0,1) distribution.
+Irwin-Hall distribution is defined as a sum of m uniform (0,1) distribution.
+Its density is given as
+\deqn{
+  f(x;m) = \frac{1}{(m-1)!}\sum_{k=0}^{m} (-1)^k {m \choose k} \max(0,x-k)^{m-1}, 0 < x < m
+}
+The density of Bates distribution, defined as an average of m uniform (0,1) distribution, can be obtained from change-of-variable (y = x/m),
+\deqn{
+  h(y;m) = \frac{m}{(m-1)!}\sum_{k=0}^{m} (-1)^k {m \choose k} \max(0,my-k)^{m-1}, 0 < y < 1
+}
 }
 \details{
-
+Due to alternating series representation, m > 80 may yield numerical issues
 }
 \examples{
-
 m = 4
 xgrid= seq(0, m, length = 500)
 plot(xgrid, dIH(xgrid, m, log = FALSE))

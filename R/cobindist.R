@@ -1,20 +1,20 @@
-
 #' Random variate generation for cobin (continuous binomial) distribution
 #'
-#' y ~ cobin(theta, 1/lambda)
-#' which is distributionally equivalent to
-#' x_1 + ... + x_lambda, x_l ~ contiBernoulli(theta)
-#'
-#' Continuous Bernoulli distribution with parameter theta has a density function
-#' f(y; theta) = theta/(e^theta-1) * e^(theta * y)
-#' or equivalently, with phi = e^theta/(1+e^theta),
-#' f(y; phi) propto phi^y * (1-phi)^(1-y)
+#' Continuous binomial distribution with natural parameter \eqn{\theta} and dispersion parameter \eqn{1/\lambda}, in short \eqn{Y \sim cobin(\theta, \lambda^{-1})}, has density 
+#' \deqn{
+#'  p(y; \theta, \lambda^{-1}) = h(y;\lambda) \exp(\lambda \theta y - \lambda B(\theta)), \quad 0 \le y \le 1
+#' }
+#' where \eqn{B(\theta) = \log\{(e^\theta - 1)/\theta\}} and \eqn{h(y;\lambda) = \frac{\lambda}{(\lambda-1)!}\sum_{k=0}^{\lambda} (-1)^k {\lambda \choose k} \max(0,\lambda y-k)^{\lambda-1}}. 
+#' When \eqn{\lambda = 1}, it becomes continuous Bernoulli distribution. 
+#' 
+#' The random variate generation is based on the fact that \eqn{cobin(\theta, \lambda^{-1})} is equal in distribution to the sum of \eqn{\lambda} \eqn{cobin(\theta, 1)} random variables, scaled by \eqn{\lambda^{-1}}.
+#' Random variate generation for continuous Bernoulli is done by inverse cdf transform method. 
 #'
 #' @param n integer, number of samples
-#' @param theta scalar or length n vector, theta
-#' @param lambda scalar or length n vector, lambda, length should be same as theta
+#' @param theta scalar or length n vector, natural parameter.
+#' @param lambda scalar or length n vector, inverse of dispersion parameter. Must be integer, length should be same as theta
 #'
-#' @returns
+#' @returns random samples from \eqn{cobin(\theta,\lambda^{-1})}.
 #' @export
 #'
 #' @examples
@@ -51,14 +51,24 @@ rcobin <- function(n, theta, lambda){
 
 
 #' Density function of cobin (continuous binomial) distribution
-#'
+#' 
+#' Continuous binomial distribution with natural parameter \eqn{\theta} and dispersion parameter \eqn{1/\lambda}, in short \eqn{Y \sim cobin(\theta, \lambda^{-1})}, has density 
+#' \deqn{
+#'  p(y; \theta, \lambda^{-1}) = h(y;\lambda) \exp(\lambda \theta y - \lambda B(\theta)), \quad 0 \le y \le 1
+#' }
+#' where \eqn{B(\theta) = \log\{(e^\theta - 1)/\theta\}} and \eqn{h(y;\lambda) = \frac{\lambda}{(\lambda-1)!}\sum_{k=0}^{\lambda} (-1)^k {\lambda \choose k} \max(0,\lambda y-k)^{\lambda-1}}. 
+#' When \eqn{\lambda = 1}, it becomes continuous Bernoulli distribution. 
+#' 
+#' For the evaluation of \eqn{h(y;\lambda)}, see `?cobin::dIH`. 
+#' 
 #' @param x num (length n), between 0 and 1, evaluation point
-#' @param theta num (length 1 or n), canonical parameter
-#' @param lambda integer, inverse of dispersion parameter
-#' @param log logical, return log density?
+#' @param theta scalar or length n vector, num (length 1 or n), natural parameter
+#' @param lambda scalar or length n vector, integer, inverse of dispersion parameter
+#' @param log logical (Default FALSE), if TRUE, return log density
 #'
-#' @returns
+#' @returns density of \eqn{cobin(\theta,\lambda^{-1})}
 #' @export
+#'
 #'
 #' @examples
 #' 
@@ -73,7 +83,7 @@ dcobin <- function(x, theta, lambda, log = FALSE){
   if(length(theta) == 1) theta = rep(theta, n)
   if(length(lambda) == 1) lambda = rep(lambda, n)
   if(any(lambda > 80)){
-    warning("density calculation with lambda > 80 is highly instable")
+    warning("density calculation with lambda > 80 is unstable")
   }
   stopifnot("length of theta should be either 1 or length(x)" = (length(theta) == length(x)))
   stopifnot("length of lambda should be either 1 or length(x)" = (length(lambda) == length(x)))
@@ -92,15 +102,28 @@ dcobin <- function(x, theta, lambda, log = FALSE){
 
 
 #' Cumulative distribution function of cobin (continuous binomial) distribution
-#'
+#' 
+#' Continuous binomial distribution with natural parameter \eqn{\theta} and dispersion parameter \eqn{1/\lambda}, in short \eqn{Y \sim cobin(\theta, \lambda^{-1})}, has density 
+#' \deqn{
+#'  p(y; \theta, \lambda^{-1}) = h(y;\lambda) \exp(\lambda \theta y - \lambda B(\theta)), \quad 0 \le y \le 1
+#' }
+#' where \eqn{B(\theta) = \log\{(e^\theta - 1)/\theta\}} and \eqn{h(y;\lambda) = \frac{\lambda}{(\lambda-1)!}\sum_{k=0}^{\lambda} (-1)^k {\lambda \choose k} \max(0,\lambda y-k)^{\lambda-1}}. 
+#' When \eqn{\lambda = 1}, it becomes continuous Bernoulli distribution. 
+#' 
 #' @param q num (length n), between 0 and 1, evaluation point
-#' @param theta num 1, canonical parameter
+#' @param theta scalar, natural parameter
 #' @param lambda integer, inverse of dispersion parameter
 #'
-#' @returns
+#' @returns c.d.f. of \eqn{cobin(\theta,\lambda^{-1})}
 #' @export
 #'
 #' @examples
+#' 
+#' xgrid = seq(0, 1, length = 500)
+#' out = pcobin(xgrid, 1, 2)
+#' plot(ecdf(rcobin(10000, 1, 2)))
+#' lines(xgrid, out, col = 2)
+#' 
 pcobin <- function(q, theta, lambda){
   if(length(lambda)!=1) stop("lambda must be scalar")
   # check lambda is integer
@@ -117,7 +140,7 @@ pcobin <- function(q, theta, lambda){
   if(lambda > 40 & lambda <= 60){
     return(pcobin_numerical(q, theta, lambda))
   }else if(lambda > 60){
-    warning("normal cdf approximation used for lambda > 60 due to numerical stability")
+    #warning("normal cdf approximation used for lambda > 60 due to numerical stability")
     return(pnorm(q, mean = cobin::bftprime(theta), sd = sqrt(cobin:::vcobin(theta,lambda))))
   }
   if(theta < 0){
@@ -229,43 +252,6 @@ pcobin_negtheta <- function(q, theta, lambda, log = F){
     return(exp(logcdf))
   }
 }
-
-
-# 
-# pcobin_hypergeometric <- function(q, theta, lambda, log = F){
-#   n = length(q)
-#   logsummand_mat = matrix(0, lambda+1, n)
-#   common = log(lambda) - lfactorial(lambda-1) + lchoose(lambda, 0:lambda) - lambda*bft(theta)
-#   for(i in 1:n){
-#     temp = lambda*q[i] - (0:lambda)
-#     zeroidx = which(temp <= 0)
-#     nonzeroidx = which(temp > 0)
-#     logsummand_mat[zeroidx,i] = -Inf
-#     #term1 = pgamma( - theta * (lambda * q[i] - (0:lambda)[nonzeroidx]), lambda)*gamma(lambda) # only valid when theta < 0 
-#     #term2 = pgamma( - theta * (lambda * (0:lambda)[nonzeroidx]/lambda - (0:lambda)[nonzeroidx]), lambda)*gamma(lambda) # only valid when theta < 0 
-#     #logsummand_mat[nonzeroidx,i] = common[nonzeroidx] + theta*(0:lambda)[nonzeroidx] - log(lambda) + log((term1 - term2)/abs(theta)^lambda)
-#     term1 = gsl::hyperg_1F1(lambda, lambda + 1, theta*temp[nonzeroidx]) # only valid when theta < 0
-#     logsummand_mat[nonzeroidx,i] = common[nonzeroidx] + theta*(0:lambda)[nonzeroidx] - 2*log(lambda) + lambda*log(temp[nonzeroidx]) + log(term1)
-#   }
-#   signs = (-1)^(0:lambda)
-#   logsums_positive = matrixStats::colLogSumExps(logsummand_mat[signs == 1,, drop = F])
-#   logsums_negative = matrixStats::colLogSumExps(logsummand_mat[signs == -1,, drop = F])
-#   if(any(logsums_positive < logsums_negative)){
-#     warning("numerical error, return 0 density value")
-#     logsums_positive = logsums_negative + pmax(logsums_positive-logsums_negative, 0)
-#     
-#     logcdf = logsums_positive + log1p(-exp(logsums_negative-logsums_positive)) # log-minus-exp
-#   }else{
-#     logcdf = logsums_positive + log1p(-exp(logsums_negative-logsums_positive)) # log-minus-exp
-#   }
-#   idxnan = which(is.nan(logcdf))
-#   logcdf[idxnan] = -Inf
-#   if(log){
-#     return(logcdf)
-#   }else{
-#     return(exp(logcdf))
-#   }
-# }
 
 pcobin_numerical <- function(q, theta, lambda) {
   sapply(q, function(q_val) {

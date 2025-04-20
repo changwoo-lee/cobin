@@ -1,28 +1,32 @@
-#' Title
+#' Find the MLE of cobin GLM
+#' 
+#' Find the maximum likelihood estimate of a cobin generalized linear model with unknown dispersion. 
+#' This is a modification of `stats::glm` to include estimation of the additional parameter, 
+#' lambda, for a cobin generalized linear model, in a similar manner to the `MASS::glm.nb`.
+#' Note that MLE of regression coefficient does not depends on lambda.  
+#' 
+#' Since dispersion parameter lambda is discrete, it does not provide standard error of lambda. With cobit link, we strongly encourage Bayesian approaches, using `cobin::cobinreg()` function. 
 #'
-#' @param formula
-#' @param data
-#' @param weights
-#' @param subset
-#' @param na.action
-#' @param start
-#' @param etastart
-#' @param mustart
-#' @param control
-#' @param method
-#' @param model
-#' @param x
-#' @param y
-#' @param contrasts
-#' @param ...
-#' @param lambda_list
-#' @param link
-#' @param verbose
+#' @param formula,data,weights,subset,na.action,start,etastart,mustart,control,method,model,x,ycontrasts,... arguments for the `stats::glm` without family and offset.
+#' @param lambda_list (Default 1:70) an integer vector of candidate lambda values. Note that MLE of coefficient does not depends on lambda 
+#' @param link character, link function. Default cobit. Must be one of "cobit", "logit", "probit", "cloglog", "cauchit".
+#' @param verbose logical, if TRUE, print the MLE of lambda.
 #'
-#' @returns
+#' @returns The object is like the output of glm but contains additional components, the ML estimate of lambda and the log-likelihood values for each lambda in the lambda_list. 
 #' @export
 #'
 #' @examples
+#' 
+#' data("GasolineYield", package = "betareg")
+#' # frequentist
+#' out_freq = glm.cobin(yield ~ temp, data = GasolineYield, link = "cobit")
+#' summary(out_freq) 
+#' # Bayesian (strongly encouraged)
+#' out = cobinreg(yield ~ temp, data = GasolineYield, 
+#'                nsave = 10000, link = "cobit")
+#' summary(out$post_save)
+#' plot(out$post_save)
+#'  
 glm.cobin <- function (formula, data, weights, subset, na.action, start = NULL,
                        etastart, mustart, control = glm.control(...), method = "glm.fit",
                        model = TRUE, x = FALSE, y = TRUE, contrasts = NULL, ...,
@@ -115,26 +119,6 @@ glm.cobin <- function (formula, data, weights, subset, na.action, start = NULL,
   names(out$ll_save) = paste("lambda =",out$lambda_list)
   return(out)
 }
-
-# 
-# andrew <- read.csv("/Users/clee/Dropbox/research/cobin/cobinreg/demo/andrew.csv", colClasses = c(QUAD = "factor", PATCH = "factor"))
-# andrew$PATCHm <- as.factor(as.numeric(as.character(andrew$PATCH)) %% 5 + 1)
-# library(plyr)
-# andrew2 <- ddply(andrew, ~PATCH, summarise, ALGAE.mean = mean(ALGAE) / 100, treat = TREAT[1])
-# andrew2
-# 
-# 
-# andrew2$treat1234 = as.numeric(as.factor(andrew2$treat))
-# 
-# 
-# out = glm.cobin(ALGAE.mean ~ treat1234, data = andrew2, link = "cobit")
-# 
-# model.matrix(out)
-# 
-# 
-# summary(out)
-# plot(out)
-# 
 
 
 

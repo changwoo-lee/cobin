@@ -2,7 +2,7 @@
 % Please edit documentation in R/glm.cobin.R
 \name{glm.cobin}
 \alias{glm.cobin}
-\title{Title}
+\title{Find the MLE of cobin GLM}
 \usage{
 glm.cobin(
   formula,
@@ -26,8 +26,36 @@ glm.cobin(
 )
 }
 \arguments{
-\item{verbose}{}
+\item{formula, data, weights, subset, na.action, start, etastart, mustart, control, method, model, x, ycontrasts, ...}{arguments for the \code{stats::glm} without family and offset.}
+
+\item{lambda_list}{(Default 1:70) an integer vector of candidate lambda values. Note that MLE of coefficient does not depends on lambda}
+
+\item{link}{character, link function. Default cobit. Must be one of "cobit", "logit", "probit", "cloglog", "cauchit".}
+
+\item{verbose}{logical, if TRUE, print the MLE of lambda.}
+}
+\value{
+The object is like the output of glm but contains additional components, the ML estimate of lambda and the log-likelihood values for each lambda in the lambda_list.
 }
 \description{
-Title
+Find the maximum likelihood estimate of a cobin generalized linear model with unknown dispersion.
+This is a modification of \code{stats::glm} to include estimation of the additional parameter,
+lambda, for a cobin generalized linear model, in a similar manner to the \code{MASS::glm.nb}.
+Note that MLE of regression coefficient does not depends on lambda.
+}
+\details{
+Since dispersion parameter lambda is discrete, it does not provide standard error of lambda. With cobit link, we strongly encourage Bayesian approaches, using \code{cobin::cobinreg()} function.
+}
+\examples{
+
+data("GasolineYield", package = "betareg")
+# frequentist
+out_freq = glm.cobin(yield ~ temp, data = GasolineYield, link = "cobit")
+summary(out_freq) 
+# Bayesian (strongly encouraged)
+out = cobinreg(yield ~ temp, data = GasolineYield, 
+               nsave = 10000, link = "cobit")
+summary(out$post_save)
+plot(out$post_save)
+ 
 }

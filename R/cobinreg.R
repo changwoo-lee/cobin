@@ -1,24 +1,78 @@
-
 #' cobin generalized linear (mixed) models
+#' 
+#' Fit Bayesian cobin regression model under canonical link (cobit link) with Markov chain Monte Carlo (MCMC). 
+#' It supports both fixed-effect only model 
+#' \deqn{
+#'  y_i \mid x_i \stackrel{ind}{\sim} cobin(x_i^T\beta, \lambda^{-1}),
+#' }
+#' for \eqn{i=1,\dots,n}, and random effect model (v 1.0.x only supports random intercept), e.g. random intercept model
+#' \deqn{
+#'  y_{ij} \mid x_{ij}, u_i \stackrel{ind}{\sim} cobin(x_{ij}^T\beta + u_i, \lambda^{-1}), \quad u_i\stackrel{iid}{\sim} N(0, \sigma_u^2)
+#' }
+#' for \eqn{i=1,\dots,n} (group), and \eqn{j=1,\dots,n_i} (observation within group).
+#' 
+#' The prior setting can be controlled with "priors" argument. 
+#' Prior for regression coefficients are independent t or normal prior centered at 0.
+#' "priors" is a named list of:  
+#' \item{beta_intercept_scale}{Default 100, the scale of the intercept prior}
+#' \item{beta_scale}{Default 100, the scale of nonintercept fixed-effect coefficients}
+#' \item{beta_df}{Default Inf, degree of freedom of t prior. If Inf, it corresponds to normal prior}
+#' \item{lambda_grid}{Default 1:70, candidate for lambda (integer)}
+#' \item{lambda_logprior}{Default \eqn{p(\lambda)\propto }}
+#' \item{y}{response vector}
+#' \item{X}{fixed effect design matrix}
+#' if random effect model, also returns
+#' \item{post_u_save}{a matrix of posterior samples (coda::mcmc) of random effects}
+#' \item{Z}{random effect design matrix}
+#' 
+#' By default, prior is set as \eqn{\beta \sim N(0, 10^2)} for regression coefficients, \eqn{p(\lambda) \propto }.eqn{\sigma_u^2 \sim IG(1, 1)}
 #'
-#' @param formula
-#' @param data
-#' @param link
-#' @param contrasts
-#' @param priors
-#' @param nburn
-#' @param nsave
-#' @param nthin
+#' @param formula an object of class "\link[stats]{formula}" or a two-sided linear formula object describing both the fixed-effects and random-effects part of the model; see "\link[lme4]{lmer}" 
+#' @param data data frame, list or environment (or object coercible by as.data.frame to a data frame) containing the variables in the model.
+#' @param link character, link function (default "cobit"). Only supports canonical link function "cobit" that is compatible with Kolmogorov-Gamma augmentation. 
+#' @param contrasts an optional list. See the contrasts.arg of \link[stats]{model.matrix.default}.
+#' @param priors a list of prior parameters. See Details
+#' @param nburn number of burn-in MCMC iterations.
+#' @param nsave number of posterior samples. Total MCMC iteration is nburn + nsave*nthin
+#' @param nthin thin-in rate. Total MCMC iteration is nburn + nsave*nthin
 #' @import lme4
 #' @import Matrix
+#' @import coda
 #'
-#' @returns
+#' @returns Returns list of 
+#' \item{post_save}{a matrix of posterior samples (coda::mcmc) with nsave rows}
+#' \item{priors}{list of hyperprior information}
+#' \item{loglik_save}{a matrix of pointwise log-likelihood values with nsave rows}
+#' \item{t_mcmc}{wall-clock time for running MCMC}
+#' \item{t_premcmc}{wall-clock time for preprocessing before MCMC}
+#' \item{y}{response vector}
+#' \item{X}{fixed effect design matrix}
+#' if random effect model, also returns
+#' \item{post_u_save}{a matrix of posterior samples (coda::mcmc) of random effects}
+#' \item{Z}{random effect design matrix}
+#' 
+#' 
 #' @export
 #'
 #' @examples
+#' 
+#' data("GasolineYield", package = "betareg")
+#' 
+#' # basic model 
+#' out1 = cobinreg(yield ~ temp, data = GasolineYield, 
+#'                nsave = 2000, link = "cobit")
+#' summary(out1$post_save)
+#' plot(out1$post_save)
+#' 
+#' # random intercept model
+#' out2 = cobinreg(yield ~ temp + (1 | batch), data = GasolineYield, 
+#'                nsave = 2000, link = "cobit")
+#' summary(out2$post_save)
+#' plot(out2$post_save)
+#' 
 cobinreg <- function(formula, data, link = "cobit", contrasts = NULL,
-                     priors = list(beta_intercept_scale = 10,
-                                   beta_scale = 2.5, beta_df = Inf),
+                     priors = list(beta_intercept_scale = 100,
+                                   beta_scale = 100, beta_df = Inf),
                      nburn = 1000, nsave = 1000, nthin = 1, MH = F, lambda_fixed = NULL){
   if(link != "cobit") stop("only supports cobit link")
 
@@ -30,6 +84,10 @@ cobinreg <- function(formula, data, link = "cobit", contrasts = NULL,
     y = model.response(temp_lm)
     X = model.matrix(temp_lm, data = data)
   }else{
+    # version 1.0.x: only supports random intercept model
+    # TODO: general mixed model with non-diagonal covariance of random effect
+    if(as.character((lme4::findbars(formula))[[1]])[2]!="1") stop("version 1.0.x only supports random intercept model")
+    
     # lmer object for design matrix constructions
     # optimizer = NULL: model fit is not performed
     temp_lmer = lmer(formula, data, contrasts = contrasts,
@@ -58,7 +116,7 @@ cobinreg <- function(formula, data, link = "cobit", contrasts = NULL,
     priors$lambda_grid = 1:70; 
   }
   lambda_grid = priors$lambda_grid;
-  if(is.null(priors$lambda_prior)){
+  if(is.null(priors$lambda_logprior)){
     priors$lambda_logprior = log(lambda_grid) + lfactorial(lambda_grid) - lfactorial(lambda_grid+4) + log(36)
   }
   if(any(y == 0) || any(y == 1)){

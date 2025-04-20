@@ -2,19 +2,32 @@
 % Please edit documentation in R/micobindist.R
 \name{rmicobin}
 \alias{rmicobin}
-\title{Title}
+\title{Random variate generation for micobin (mixture of continuous binomial) distribution}
 \usage{
 rmicobin(n, theta, psi, r = 2)
 }
 \arguments{
-\item{n}{}
+\item{n}{integer, number of samples}
 
-\item{theta}{}
+\item{theta}{scalar or length n vector, natural parameter}
 
-\item{psi}{}
+\item{psi}{scalar or length n vector, between 0 and 1, dispersion parameter}
 
-\item{r}{}
+\item{r}{(Default 2) This should be always 2 to maintain interpretaton of psi. It is kept for future experiment purposes.}
+}
+\value{
+random samples from \eqn{micobin(\theta,\psi)}.
 }
 \description{
-Title
+Micobin distribution with natural parameter \eqn{\theta} and dispersion \eqn{psi}, denoted as \eqn{micobin(\theta, \psi)}, is defined as a dispersion mixture of cobin:
+\deqn{
+  Y \sim micobin(\theta, \psi) \iff Y | \lambda \sim cobin(\theta, \lambda^{-1}), (\lambda-1) \sim negbin(2, \psi) 
+}
+}
+\examples{
+
+hist(rmicobin(1000, 2, 1/3), freq = FALSE)
+xgrid = seq(0, 1, length = 500)
+lines(xgrid, dmicobin(xgrid, 2, 1/3))
+
 }

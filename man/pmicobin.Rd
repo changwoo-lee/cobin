@@ -2,21 +2,34 @@
 % Please edit documentation in R/micobindist.R
 \name{pmicobin}
 \alias{pmicobin}
-\title{Title}
+\title{Cumulative distribution function of micobin (mixture of continuous binomial) distribution}
 \usage{
 pmicobin(q, theta, psi, r = 2, l_max = 70)
 }
 \arguments{
-\item{q}{}
+\item{q}{num (length n), between 0 and 1, evaluation point}
 
-\item{theta}{}
+\item{theta}{scalar, natural parameter}
 
-\item{psi}{}
+\item{psi}{scalar, dispersion parameter}
 
-\item{r}{}
+\item{r}{(Default 2) This should be always 2 to maintain interpretaton of psi. It is kept for future experiment purposes.}
 
-\item{l_max}{}
+\item{l_max}{integer (Default 70), upper bound of lambda.}
+}
+\value{
+c.d.f. of \eqn{micobin(\theta, \psi)}
 }
 \description{
-Title
+Micobin distribution with natural parameter \eqn{\theta} and dispersion \eqn{psi}, denoted as \eqn{micobin(\theta, \psi)}, is defined as a dispersion mixture of cobin:
+\deqn{
+  Y \sim micobin(\theta, \psi) \iff Y | \lambda \sim cobin(\theta, \lambda^{-1}), (\lambda-1) \sim negbin(2, \psi) 
+}
+so that micobin cdf is a weighted sum of cobin cdf with negative binomial weights.
+}
+\examples{
+xgrid = seq(0, 1, length = 500)
+out = pmicobin(xgrid, 1, 1/2)
+plot(ecdf(rmicobin(10000, 1, 1/2)))
+lines(xgrid, out, col = 2)
 }

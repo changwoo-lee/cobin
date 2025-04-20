@@ -9,20 +9,24 @@ rcobin(n, theta, lambda)
 \arguments{
 \item{n}{integer, number of samples}
 
-\item{theta}{scalar or length n vector, theta}
+\item{theta}{scalar or length n vector, natural parameter.}
 
-\item{lambda}{scalar or length n vector, lambda, length should be same as theta}
+\item{lambda}{scalar or length n vector, inverse of dispersion parameter. Must be integer, length should be same as theta}
+}
+\value{
+random samples from \eqn{cobin(\theta,\lambda^{-1})}.
 }
 \description{
-y ~ cobin(theta, 1/lambda)
-which is distributionally equivalent to
-x_1 + ... + x_lambda, x_l ~ contiBernoulli(theta)
+Continuous binomial distribution with natural parameter \eqn{\theta} and dispersion parameter \eqn{1/\lambda}, in short \eqn{Y \sim cobin(\theta, \lambda^{-1})}, has density
+\deqn{
+ p(y; \theta, \lambda^{-1}) = h(y;\lambda) \exp(\lambda \theta y - \lambda B(\theta)), \quad 0 \le y \le 1
+}
+where \eqn{B(\theta) = \log\{(e^\theta - 1)/\theta\}} and \eqn{h(y;\lambda) = \frac{\lambda}{(\lambda-1)!}\sum_{k=0}^{\lambda} (-1)^k {\lambda \choose k} \max(0,\lambda y-k)^{\lambda-1}}.
+When \eqn{\lambda = 1}, it becomes continuous Bernoulli distribution.
 }
 \details{
-Continuous Bernoulli distribution with parameter theta has a density function
-f(y; theta) = theta/(e^theta-1) * e^(theta * y)
-or equivalently, with phi = e^theta/(1+e^theta),
-f(y; phi) propto phi^y * (1-phi)^(1-y)
+The random variate generation is based on the fact that \eqn{cobin(\theta, \lambda^{-1})} is equal in distribution to the sum of \eqn{\lambda} \eqn{cobin(\theta, 1)} random variables, scaled by \eqn{\lambda^{-1}}.
+Random variate generation for continuous Bernoulli is done by inverse cdf transform method.
 }
 \examples{
 
