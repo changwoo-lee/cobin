@@ -2,14 +2,20 @@
 % Please edit documentation in R/varfunctions.R
 \name{bftprime}
 \alias{bftprime}
+\alias{cobitlinkinv}
 \title{First derivative of cobin cumulant (log partition) function}
 \usage{
 bftprime(x)
+
+cobitlinkinv(x)
 }
 \arguments{
-\item{x}{}
+\item{x}{input vector}
+}
+\value{
+\eqn{B'(x) = 1/(1-\exp(-x))-1/x}.
 }
 \description{
-B'(x) = 1/(1-exp(-x))-1/x.
-When g is canonical link, this is same as g^(-1)
+\eqn{B'(x) = 1/(1-\exp(-x))-1/x}.
+When \eqn{g} is canonical link of cobin, this is same as \eqn{g^{-1}}
 }

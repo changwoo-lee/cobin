@@ -1,25 +1,67 @@
-
-
-
-
-#' Title
+#' spatial micobin regression model
+#' 
+#' Fit Bayesian spatial micobin regression model under canonical link (cobit link) with Markov chain Monte Carlo (MCMC).
+#' \deqn{
+#'  y(s_{i}) \mid x(s_{i}), u(s_i) \stackrel{ind}{\sim} micobin(x(s_{i})^T\beta + u(s_i), \psi), \quad u(\cdot)\sim GP
+#' }
+#' for \eqn{i=1,\dots,n}.  See \link[cobin]{dmicobin} for details on micobin distribution. It currently only supports  mean zero GP with exponential covariance
+#' \deqn{
+#'   cov(u(s_i), u(s_j)) = \sigma_u^2\exp(-\phi_u d(s_i,s_j))
+#' }
+#' where \eqn{\phi_u} corresponds to inverse range parameter. 
+#' 
+#' The prior setting can be controlled with "priors" argument. 
+#' Prior for regression coefficients are independent normal or t prior centered at 0.
+#' "priors" is a named list of:  
+#' \itemize{
+#' \item beta_intercept_scale, Default 100, the scale of the intercept prior
+#' \item beta_scale, Default 100, the scale of nonintercept fixed-effect coefficients
+#' \item beta_df, Default Inf, degree of freedom of t prior. If `beta_df=Inf`, it corresponds to normal prior
+#' \item lambda_max, Default 70, upper bound for lambda (integer)
+#' \item psi_ab, Default c(2,2), beta shape parameters for \eqn{\psi} (length 2 vector).
+#' \item logprior_sigma.sq, Default half-Cauchy on the sd(u) \eqn{=\sigma_u}, log prior of var(u)\eqn{=\sigma_u^2}
+#' \item phi_lb, lower bound of uniform prior of \eqn{\phi_u} (inverse range parameter of spatial random effect). Can be same as phi_ub
+#' \item phi_ub, lower bound of uniform prior of \eqn{\phi_u} (inverse range parameter of spatial random effect). Can be same as phi_lb
+#' }
 #'
-#' @param formula
-#' @param data
-#' @param link
-#' @param coords
-#' @param NNGP
-#' @param contrasts
-#' @param priors
-#' @param nngp.control
-#' @param nburn
-#' @param nsave
-#' @param nthin
+#' @param formula an object of class "\link[stats]{formula}" or a two-sided linear formula object describing both the fixed-effects and random-effects part of the model; see "\link[lme4]{lmer}" 
+#' @param data data frame, list or environment (or object coercible by as.data.frame to a data frame) containing the variables in the model.
+#' @param link character, link function (default "cobit"). Only supports canonical link function "cobit" that is compatible with Kolmogorov-Gamma augmentation. 
+#' @param coords a n x 2 matrix of Euclidean coordinates
+#' @param NNGP logical, if TRUE, use NNGP prior for the spatial random effects; see \link[spNNGP]{spNNGP}
+#' @param contrasts an optional list. See the contrasts.arg of \link[stats]{model.matrix.default}.
+#' @param priors a list of prior hyperparameters. See Details
+#' @param nngp.control a list of control parameters for NNGP prior (only when NNGP = TRUE). This should be a named list of n.neighbors and ord, with default of 15 and first coordiate-based ordering.. See \link[spNNGP]{spNNGP} for details.
+#' @param nburn number of burn-in MCMC iterations.
+#' @param nsave number of posterior samples. Total MCMC iteration is nburn + nsave*nthin
+#' @param nthin thin-in rate. Total MCMC iteration is nburn + nsave*nthin
+#' @import spNNGP
+#' @import lme4
+#' @import fields
+#' @import coda
 #'
-#' @returns
+#' @returns Returns list of 
+#' \item{post_save}{a matrix of posterior samples (coda::mcmc) with nsave rows}
+#' \item{post_u_save}{a matrix of posterior samples (coda::mcmc) of random effects, with nsave rows}
+#' \item{loglik_save}{a nsave x n matrix of pointwise log-likelihood values, can be used for WAIC calculation.}
+#' \item{priors}{list of hyperprior information}
+#' \item{nsave}{number of MCMC samples}
+#' \item{t_mcmc}{wall-clock time for running MCMC}
+#' \item{t_premcmc}{wall-clock time for preprocessing before MCMC}
+#' \item{y}{response vector}
+#' \item{X}{fixed effect design matrix}
+#' \item{coords}{a n x 2 matrix of Euclidean coordinates}
+#' if NNGP = TRUE, also returns
+#' \item{nngp.control}{a list of control parameters for NNGP prior}
+#' \item{spNNGPfit}{an "NNGP" class with empty samples, placeholder for prediction}
+#' 
+#' 
 #' @export
 #'
 #' @examples
+#' \dontrun{
+#'  # please see https://github.com/changwoo-lee/cobin-reproduce/blob/main/Sec6_mmicasestudy/results_main_n949/run_n949.R
+#' }
 spmicobinreg <- function(formula, data, link = "cobit",
                        coords, NNGP = FALSE, contrasts = NULL,
                        priors = list(beta_intercept_scale = 10,
@@ -132,50 +174,3 @@ spmicobinreg <- function(formula, data, link = "cobit",
   return(out)
 }
 
-
-# 
-# n <- 1000
-# p <- 1
-# X <- matrix(rnorm(n * p), n, p)
-# beta <- 1  # without intercept
-# 
-# library(fields)
-# coords = cbind(runif(n), runif(n))
-# dmat = rdist(coords)
-# Sigma = 1*Matern(dmat, range = 1/0.1, smoothness = 0.5)
-# u =as.numeric(mvnfast::rmvn(1, rep(0, n), Sigma))
-# y = rmicobin(n, X%*%beta + u, rep(0.5, n))
-# 
-# df = data.frame(y = y, X=X)
-# 
-# quilt.plot(coords, u - mean(u))
-# 
-# myout1 = spmicobinreg(y ~ X, df, coords = coords, NNGP = F, priors = list(phi_lb = 0.1, phi_ub = 0.1),
-#                     #nngp.control = list(n.neighbors = 30, ord = order(coords[, 1])),
-#                     nburn = 100, nsave = 1000, nthin = 1)
-# myout1$t_mcmc
-# quilt.plot(coords, colMeans(myout1$post_u_save))
-# summary(myout1$post_save)
-# plot(myout1$post_save)
-# summary(myout1$post_save[,"sigma.sq"])
-# 
-# library(GpGp)
-# myord = GpGp::order_maxmin(coords)
-# 
-# 
-# library(spNNGP)
-# myout2 = spmicobinreg(y ~ X, df, coords = coords, NNGP = T, priors = list(phi_lb = 0.1, phi_ub = 0.1),
-#                     #nngp.control = list(n.neighbors = 30, ord = myord),
-#                     nburn = 100, nsave = 1000, nthin = 1)
-# myout2$t_mcmc
-# quilt.plot(coords, colMeans(myout2$post_u_save))
-# summary(myout2$post_save)
-# plot(myout2$post_save)
-# quilt.plot(coords, u)
-# bayesplot::mcmc_intervals(myout1$post_save)
-# bayesplot::mcmc_intervals(myout2$post_save)
-# #
-# 
-# 
-# 
-# 

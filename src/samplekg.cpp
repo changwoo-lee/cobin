@@ -12,7 +12,7 @@ using namespace Rcpp;
 //----------------------------------------------------------------
 // Function: a_coef
 //
-// Computes the coefficient a_n(x) as in the Rust version.
+// Computes the coefficient a_n(x) 
 //----------------------------------------------------------------
 double a_coef(int n, double xval) {
   if(xval > TRUNC) {
@@ -228,26 +228,46 @@ double rkg_b(int b, double z) {
 //----------------------------------------------------------------
 // Function: rkg
 //
-// Vectorized version: takes two NumericVectors b and z (of equal length or 1)
+// Vectorized version: takes two NumericVectors b and c (of equal length or 1)
 // and returns a NumericVector of corresponding rkg_b samples.
 //----------------------------------------------------------------
+//' Sample Kolmogorov-Gamma random variables
+//'
+//' A random variable \eqn{X} follows Kolmogorov-Gamma(b,c) distribution, in short KG(b,c), if
+//' \deqn{
+//'  X \stackrel{d}{=} \dfrac{1}{2\pi^2}\sum_{k=1}^\infty \dfrac{\epsilon_k}{k^2 + c^2/(4\pi^2)}, \quad \epsilon_k\stackrel{iid}{\sim} Gamma(b,1)
+//' }
+//' where \eqn{\stackrel{d}{=}} denotes equality in distribution. 
+//' The random variate generation is based on alternating series method, a fast and exact method (without infinite sum truncation) implemented in cpp. 
+//' This function only supports integer b, which is sufficient for cobin and micobin regression models.  
+//'
+//' @param n The number of samples. 
+//' @param b First parameter, positive integer (1,2,...). Length must be 1 or n.
+//' @param c Second parameter, real, associated with tilting. Length must be 1 or n.
+//' @return It returns n independent Kolmogorov-Gamma(\code{b[i]},\code{c[i]}) samples. If input b or c is scalar, it is assumed to be length n vector with same entries.  
+//' @examples
+//' \dontrun{
+//' rkgcpp(1000, 1, 2)
+//' rkgcpp(1000, 1, rnorm(1000))
+//' rkgcpp(1000, rep(c(1,2),500), rnorm(1000))
+//' }
 //' @export
 // [[Rcpp::export]]
-NumericVector rkgcpp(int n, NumericVector b, NumericVector z) {
+NumericVector rkgcpp(int n, NumericVector b, NumericVector c) {
   // If b has length 1, replicate its value to length n.
   if (b.size() == 1) {
     NumericVector b_rep(n, b[0]);
     b = b_rep;
   }
-  // If z has length 1, replicate its value to length n.
-  if (z.size() == 1) {
-    NumericVector z_rep(n, z[0]);
-    z = z_rep;
+  // If c has length 1, replicate its value to length n.
+  if (c.size() == 1) {
+    NumericVector c_rep(n, c[0]);
+    c = c_rep;
   }
   if (b.size() != n)
     Rcpp::stop("rkgcpp error: Length of b must equal 1 or n.");
-  if (z.size() != n)
-    Rcpp::stop("rkgcpp error: Length of z must equal 1 or n.");
+  if (c.size() != n)
+    Rcpp::stop("rkgcpp error: Length of c must equal 1 or n.");
 
   // Pre-check b vector and convert to integer vector.
   std::vector<int> b_int(n);
@@ -263,7 +283,7 @@ NumericVector rkgcpp(int n, NumericVector b, NumericVector z) {
   // Now compute the output using the pre-validated b_int.
   NumericVector ret(n);
   for (int i = 0; i < n; i++) {
-    ret[i] = rkg_b(b_int[i], z[i]);
+    ret[i] = rkg_b(b_int[i], c[i]);
   }
   return ret;
 }

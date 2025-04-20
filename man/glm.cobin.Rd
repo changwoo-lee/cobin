@@ -26,7 +26,7 @@ glm.cobin(
 )
 }
 \arguments{
-\item{formula, data, weights, subset, na.action, start, etastart, mustart, control, method, model, x, ycontrasts, ...}{arguments for the \code{stats::glm} without family and offset.}
+\item{formula, data, weights, subset, na.action, start, etastart, mustart, control, method, model, x, y, contrasts, ...}{arguments for the \code{stats::glm} without family and offset.}
 
 \item{lambda_list}{(Default 1:70) an integer vector of candidate lambda values. Note that MLE of coefficient does not depends on lambda}
 
@@ -47,7 +47,7 @@ Note that MLE of regression coefficient does not depends on lambda.
 Since dispersion parameter lambda is discrete, it does not provide standard error of lambda. With cobit link, we strongly encourage Bayesian approaches, using \code{cobin::cobinreg()} function.
 }
 \examples{
-
+\dontrun{
 data("GasolineYield", package = "betareg")
 # frequentist
 out_freq = glm.cobin(yield ~ temp, data = GasolineYield, link = "cobit")
@@ -57,5 +57,5 @@ out = cobinreg(yield ~ temp, data = GasolineYield,
                nsave = 10000, link = "cobit")
 summary(out$post_save)
 plot(out$post_save)
- 
+}
 }

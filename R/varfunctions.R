@@ -1,13 +1,11 @@
 #' Cumulant (log partition) function of cobin
 #'
-#' B(x) = log((exp(x)-1)/x)
+#' \eqn{B(x) = \log\{(\exp(x)-1)/x)\}}
 #'
-#' @param x
+#' @param x input vector
 #'
-#' @returns
+#' @returns \eqn{B(x) = \log\{(\exp(x)-1)/x)\}}
 #' @export
-#'
-#' @examples
 bft <- function(x){
   # divided domain into 5 different parts to maintain numerical stability
   zeroidx = which(abs(x) <= 1e-16) # practically zero
@@ -26,15 +24,13 @@ bft <- function(x){
 
 #' First derivative of cobin cumulant (log partition) function
 #'
-#' B'(x) = 1/(1-exp(-x))-1/x.
-#' When g is canonical link, this is same as g^(-1)
+#' \eqn{B'(x) = 1/(1-\exp(-x))-1/x}.
+#' When \eqn{g} is canonical link of cobin, this is same as \eqn{g^{-1}}
 #'
-#' @param x
+#' @param x input vector
 #'
-#' @returns
+#' @returns \eqn{B'(x) = 1/(1-\exp(-x))-1/x}.
 #' @export
-#'
-#' @examples
 bftprime = function(x){
   #out = 1/(1-exp(-x))-1/x
   out = -1/expm1(-x)-1/x
@@ -43,18 +39,19 @@ bftprime = function(x){
   out
 }
 
+#' @rdname bftprime
+#' @export
+cobitlinkinv <- bftprime
+
 #' Second derivative of cobin cumulant (log partition) function
 #'
-#' B''(x) = 1/x^2 + 1/(2-2*cosh(x))
+#' \eqn{B''(x) = 1/x^2 + 1/(2-2*\cosh(x))}
 #' used Taylor series expansion for x near 0 for stability
-#' When g is canonical link, this is same as (g^(-1))'
 #'
-#' @param x
+#' @param x input vector
 #'
-#' @returns
+#' @returns \eqn{B''(x) = 1/x^2 + 1/(2-2*\cosh(x))}
 #' @export
-#'
-#' @examples
 bftprimeprime = function(x){
   #out = 1/x^2 + 1/(2-2*cosh(x))
   out = 1/x^2 - 1/(expm1(x) + expm1(-x))
@@ -66,15 +63,13 @@ bftprimeprime = function(x){
 
 #' Third derivative of cobin cumulant (log partition) function
 #'
-#' B'''(x) = 1/(4*tanh(x/2)*sinh(x/2)^2) - 2/x^3
+#' \eqn{B'''(x) = 1/(4*\tanh(x/2)*\sinh(x/2)^2) - 2/x^3}
 #' used Taylor series expansion for x near 0 for stability
 #'
-#' @param x
+#' @param x input vector
 #'
-#' @returns
+#' @returns \eqn{B'''(x) = 1/(4*\tanh(x/2)*\sinh(x/2)^2) - 2/x^3}
 #' @export
-#'
-#' @examples
 bftprimeprimeprime = function(x){
   out = 1/(4*tanh(x/2)*sinh(x/2)^2) - 2/x^3
   nearzeroidx = which(abs(x) < 5e-3)
@@ -84,18 +79,17 @@ bftprimeprimeprime = function(x){
 
 #' Inverse of first derivative of cobin cumulant (log partition) function
 #'
-#' Calculates (B')^(-1)(y) using numerical inversion (Newton-Raphson)
-#' This is the cobit link function g, the canonical link function of cobin
+#' Calculates \eqn{(B')^{-1}(y)} using numerical inversion (Newton-Raphson),
+#' where \eqn{B'(x) = 1/(1-\exp(-x))-1/x}. 
+#' This is the cobit link function g, the canonical link function of cobin. 
 #'
-#' @param y
-#' @param x0 initial value
+#' @param y input vector
+#' @param x0 Defult 0, initial value
 #' @param tol tolerance, stopping criterion for Newton-Raphson
 #' @param maxiter max iteration of Newton-Raphson
 #'
-#' @returns
+#' @returns \eqn{(B')^{-1}(y)}
 #' @export
-#'
-#' @examples
 bftprimeinv = function(y, x0 = 0, tol = 1e-8, maxiter = 100){
   # y is vector
   # check if all elements of y is between 0 and 1
@@ -117,51 +111,21 @@ bftprimeinv = function(y, x0 = 0, tol = 1e-8, maxiter = 100){
   return(x)
 }
 
+#' @rdname bftprimeinv
+#' @export
+cobitlink <- bftprimeinv
 
 #' Variance function of cobin
 #'
-#' B''(B'^(-1)(mu))
+#' \eqn{B''(B'^{-1}(\mu))}
 #'
-#' @param mu
+#' @param mu input vector
 #'
-#' @returns
+#' @returns \eqn{B''(B'^{-1}(\mu))}
 #' @export
-#'
-#' @examples
 Vft <- function(mu){
   bftprimeprime(bftprimeinv(mu))
 }
 
-
-# gprime <- function(y){
-# #   1/ginvprime(g(y))
-#   1/bftprimeprime(bftprimeinv(y))
-# }
-
-
-
-
-
-#
-# # log(x/(exp(x)-1)),
-#
-# log_x_over_expxm1 <- function(x){
-#   # divided domain into 5 different parts to maintain numerical stability
-#   zeroidx = which(abs(x) <= 1e-16) # practically zero
-#   pos1idx = which(x > 1e-16 & x < 1)
-#   pos2idx = which(x >= 1)
-#   neg1idx = which(x < -1e-16 & x > -1)
-#   neg2idx = which(x <= -1)
-#   out = numeric(length(x))
-#   if(length(zeroidx) > 0) out[zeroidx] = 0
-#   if(length(neg1idx) > 0) out[neg1idx] = log(-x[neg1idx]) - log(-expm1(x[neg1idx]))
-#   if(length(neg2idx) > 0) out[neg2idx] = log(x[neg2idx]/(exp(x[neg2idx])-1))
-#   if(length(pos1idx) > 0) out[pos1idx] = log(x[pos1idx]) - log(expm1(x[pos1idx]))
-#   if(length(pos2idx) > 0) out[pos2idx] = log(x[pos2idx]) - x[pos2idx]-log1p(-exp(-x[pos2idx]))
-#   out
-# }
-# #xgrid = c(-3000, -2, -1e-13, 0, 2e-11, 4, 6000)
-# #log(xgrid/(exp(xgrid)-1))
-# #log_x_over_expxm1(xgrid)
 
 

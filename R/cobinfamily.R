@@ -19,7 +19,6 @@
 #' @return An object of class "family", a list of functions and expressions needed by glm() to fit a cobin generalized linear model.
 #' @export
 #'
-#' @examples
 cobinfamily <- function (lambda = stop("'lambda' must be specified"), link = "cobit")
 {
   linktemp <- substitute(link)

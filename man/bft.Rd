@@ -7,8 +7,11 @@
 bft(x)
 }
 \arguments{
-\item{x}{}
+\item{x}{input vector}
+}
+\value{
+\eqn{B(x) = \log\{(\exp(x)-1)/x)\}}
 }
 \description{
-B(x) = log((exp(x)-1)/x)
+\eqn{B(x) = \log\{(\exp(x)-1)/x)\}}
 }

@@ -7,7 +7,7 @@
 #' 
 #' Since dispersion parameter lambda is discrete, it does not provide standard error of lambda. With cobit link, we strongly encourage Bayesian approaches, using `cobin::cobinreg()` function. 
 #'
-#' @param formula,data,weights,subset,na.action,start,etastart,mustart,control,method,model,x,ycontrasts,... arguments for the `stats::glm` without family and offset.
+#' @param formula,data,weights,subset,na.action,start,etastart,mustart,control,method,model,x,y,contrasts,... arguments for the `stats::glm` without family and offset.
 #' @param lambda_list (Default 1:70) an integer vector of candidate lambda values. Note that MLE of coefficient does not depends on lambda 
 #' @param link character, link function. Default cobit. Must be one of "cobit", "logit", "probit", "cloglog", "cauchit".
 #' @param verbose logical, if TRUE, print the MLE of lambda.
@@ -16,7 +16,7 @@
 #' @export
 #'
 #' @examples
-#' 
+#' \dontrun{
 #' data("GasolineYield", package = "betareg")
 #' # frequentist
 #' out_freq = glm.cobin(yield ~ temp, data = GasolineYield, link = "cobit")
@@ -26,7 +26,7 @@
 #'                nsave = 10000, link = "cobit")
 #' summary(out$post_save)
 #' plot(out$post_save)
-#'  
+#' }
 glm.cobin <- function (formula, data, weights, subset, na.action, start = NULL,
                        etastart, mustart, control = glm.control(...), method = "glm.fit",
                        model = TRUE, x = FALSE, y = TRUE, contrasts = NULL, ...,

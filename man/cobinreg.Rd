@@ -26,7 +26,7 @@ cobinreg(
 
 \item{contrasts}{an optional list. See the contrasts.arg of \link[stats]{model.matrix.default}.}
 
-\item{priors}{a list of prior parameters. See Details}
+\item{priors}{a list of prior hyperparameters. See Details}
 
 \item{nburn}{number of burn-in MCMC iterations.}
 
@@ -37,8 +37,9 @@ cobinreg(
 \value{
 Returns list of
 \item{post_save}{a matrix of posterior samples (coda::mcmc) with nsave rows}
+\item{loglik_save}{a nsave x n matrix of pointwise log-likelihood values, can be used for WAIC calculation.}
 \item{priors}{list of hyperprior information}
-\item{loglik_save}{a matrix of pointwise log-likelihood values with nsave rows}
+\item{nsave}{number of MCMC samples}
 \item{t_mcmc}{wall-clock time for running MCMC}
 \item{t_premcmc}{wall-clock time for preprocessing before MCMC}
 \item{y}{response vector}
@@ -53,31 +54,31 @@ It supports both fixed-effect only model
 \deqn{
  y_i \mid x_i \stackrel{ind}{\sim} cobin(x_i^T\beta, \lambda^{-1}),
 }
-for \eqn{i=1,\dots,n}, and random effect model (v 1.0.x only supports random intercept), e.g. random intercept model
+for \eqn{i=1,\dots,n}, and random intercept model (v 1.0.x only supports random intercept),
 \deqn{
  y_{ij} \mid x_{ij}, u_i \stackrel{ind}{\sim} cobin(x_{ij}^T\beta + u_i, \lambda^{-1}), \quad u_i\stackrel{iid}{\sim} N(0, \sigma_u^2)
 }
-for \eqn{i=1,\dots,n} (group), and \eqn{j=1,\dots,n_i} (observation within group).
+for \eqn{i=1,\dots,n} (group), and \eqn{j=1,\dots,n_i} (observation within group). See \link[cobin]{dcobin} for details on cobin distribution.
 }
 \details{
 The prior setting can be controlled with "priors" argument.
-Prior for regression coefficients are independent t or normal prior centered at 0.
+Prior for regression coefficients are independent normal or t prior centered at 0.
 "priors" is a named list of:
-\item{beta_intercept_scale}{Default 100, the scale of the intercept prior}
-\item{beta_scale}{Default 100, the scale of nonintercept fixed-effect coefficients}
-\item{beta_df}{Default Inf, degree of freedom of t prior. If Inf, it corresponds to normal prior}
-\item{lambda_grid}{Default 1:70, candidate for lambda (integer)}
-\item{lambda_logprior}{Default \eqn{p(\lambda)\propto }}
-\item{y}{response vector}
-\item{X}{fixed effect design matrix}
-if random effect model, also returns
-\item{post_u_save}{a matrix of posterior samples (coda::mcmc) of random effects}
-\item{Z}{random effect design matrix}
-
-By default, prior is set as \eqn{\beta \sim N(0, 10^2)} for regression coefficients, \eqn{p(\lambda) \propto }.eqn{\sigma_u^2 \sim IG(1, 1)}
+\itemize{
+\item beta_intercept_scale, Default 100, the scale of the intercept prior
+\item beta_scale, Default 100, the scale of nonintercept fixed-effect coefficients
+\item beta_df, Default Inf, degree of freedom of t prior. If \code{beta_df=Inf}, it corresponds to normal prior
+\item lambda_grid, Default 1:70, candidate for lambda (integer)
+\item lambda_logprior, Default \eqn{p(\lambda)\propto \lambda \Gamma(\lambda+1)/\Gamma(\lambda+5)}, log-prior of lambda. Default choice arises from beta negative binomial distribution; \eqn{(\lambda-1)\mid \psi \sim negbin(2,\psi), \psi\sim Beta(2,2)}.
+}
+if random intercept model, u ~ InvGamma(a_u,b_u) with
+\itemize{
+\item a_u, Default 1, first parameter of Inverse Gamma prior of u
+\item b_u, Default 1, second parameter of Inverse Gamma prior of u
+}
 }
 \examples{
-
+\dontrun{
 data("GasolineYield", package = "betareg")
 
 # basic model 
@@ -91,5 +92,5 @@ out2 = cobinreg(yield ~ temp + (1 | batch), data = GasolineYield,
                nsave = 2000, link = "cobit")
 summary(out2$post_save)
 plot(out2$post_save)
-
+}
 }

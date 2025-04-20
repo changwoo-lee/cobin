@@ -13,9 +13,29 @@ pgig_negonehalf_export <- function(x, a, b) {
     .Call(`_cobin_pgig_negonehalf_export`, x, a, b)
 }
 
+#' Sample Kolmogorov-Gamma random variables
+#'
+#' A random variable \eqn{X} follows Kolmogorov-Gamma(b,c) distribution, in short KG(b,c), if
+#' \deqn{
+#'  X \stackrel{d}{=} \dfrac{1}{2\pi^2}\sum_{k=1}^\infty \dfrac{\epsilon_k}{k^2 + c^2/(4\pi^2)}, \quad \epsilon_k\stackrel{iid}{\sim} Gamma(b,1)
+#' }
+#' where \eqn{\stackrel{d}{=}} denotes equality in distribution. 
+#' The random variate generation is based on alternating series method, a fast and exact method (without infinite sum truncation) implemented in cpp. 
+#' This function only supports integer b, which is sufficient for cobin and micobin regression models.  
+#'
+#' @param n The number of samples. 
+#' @param b First parameter, positive integer (1,2,...). Length must be 1 or n.
+#' @param c Second parameter, real, associated with tilting. Length must be 1 or n.
+#' @return It returns n independent Kolmogorov-Gamma(\code{b[i]},\code{c[i]}) samples. If input b or c is scalar, it is assumed to be length n vector with same entries.  
+#' @examples
+#' \dontrun{
+#' rkgcpp(1000, 1, 2)
+#' rkgcpp(1000, 1, rnorm(1000))
+#' rkgcpp(1000, rep(c(1,2),500), rnorm(1000))
+#' }
 #' @export
-rkgcpp <- function(n, b, z) {
-    .Call(`_cobin_rkgcpp`, n, b, z)
+rkgcpp <- function(n, b, c) {
+    .Call(`_cobin_rkgcpp`, n, b, c)
 }
 
 rinvgauss_mulambda_export <- function(n, mu, lambda) {

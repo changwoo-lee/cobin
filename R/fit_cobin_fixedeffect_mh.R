@@ -63,9 +63,9 @@ fit_cobin_fixedeffect_mh <- function(y, X, Z, priors,
     
     # Step 1-2: sample beta
     if(imcmc < start_adapt){
-      beta_star = beta + as.numeric(mvnfast::rmvn(1, rep(0,p), C0))
+      beta_star = beta + as.numeric(spam::rmvnorm(1, rep(0,p), C0))
     }else{
-      beta_star = beta + as.numeric(mvnfast::rmvn(1, rep(0,p), Ct))
+      beta_star = beta + as.numeric(spam::rmvnorm(1, rep(0,p), Ct))
     }
     Xbeta_star = X%*%beta_star
     acc_ratio = #sum(dnorm(beta_star, rep(0,p), beta_s, log = T) - dnorm(beta, rep(0,p), beta_s, log = T)) + # uniform prior on rho

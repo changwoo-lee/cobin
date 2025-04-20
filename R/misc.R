@@ -1,9 +1,9 @@
-#' Vectorized sampling (by row by row) with probability stored in rows of matrix
-#' source: https://stackoverflow.com/questions/20508658/sampling-repeatedly-with-different-probability
-#'
-#' @param Weight n by K matrix, each row corresponds to unnormalized probabilities of sampling weights
-#'
-#' @return integers with length n, each element in {1,...,K}
+# Vectorized sampling (by row by row) with probability stored in rows of matrix
+# source: https://stackoverflow.com/questions/20508658/sampling-repeatedly-with-different-probability
+#
+# n by K matrix, each row corresponds to unnormalized probabilities of sampling weights
+#
+# return integers with length n, each element in {1,...,K}
 sample.rowwise <- function(Weight) {
   x <- runif(nrow(Weight))
   cumul.w <- Weight %*% upper.tri(diag(ncol(Weight)), diag = TRUE)/rowSums(Weight)

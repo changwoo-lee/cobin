@@ -7,8 +7,11 @@
 Vft(mu)
 }
 \arguments{
-\item{mu}{}
+\item{mu}{input vector}
+}
+\value{
+\eqn{B''(B'^{-1}(\mu))}
 }
 \description{
-B''(B'^(-1)(mu))
+\eqn{B''(B'^{-1}(\mu))}
 }

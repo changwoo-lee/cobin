@@ -50,15 +50,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // rkgcpp
-NumericVector rkgcpp(int n, NumericVector b, NumericVector z);
-RcppExport SEXP _cobin_rkgcpp(SEXP nSEXP, SEXP bSEXP, SEXP zSEXP) {
+NumericVector rkgcpp(int n, NumericVector b, NumericVector c);
+RcppExport SEXP _cobin_rkgcpp(SEXP nSEXP, SEXP bSEXP, SEXP cSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< int >::type n(nSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type b(bSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type z(zSEXP);
-    rcpp_result_gen = Rcpp::wrap(rkgcpp(n, b, z));
+    Rcpp::traits::input_parameter< NumericVector >::type c(cSEXP);
+    rcpp_result_gen = Rcpp::wrap(rkgcpp(n, b, c));
     return rcpp_result_gen;
 END_RCPP
 }

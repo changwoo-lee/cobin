@@ -1,28 +1,67 @@
-
-
-
-
-#' Title
+#' spatial cobin regression model
+#' 
+#' Fit Bayesian spatial cobin regression model under canonical link (cobit link) with Markov chain Monte Carlo (MCMC).
+#' \deqn{
+#'  y(s_{i}) \mid x(s_{i}), u(s_i) \stackrel{ind}{\sim} cobin(x(s_{i})^T\beta + u(s_i), \lambda^{-1}), \quad u(\cdot)\sim GP
+#' }
+#' for \eqn{i=1,\dots,n}. See \link[cobin]{dcobin} for details on cobin distribution. It currently only supports mean zero GP with exponential covariance
+#' \deqn{
+#'   cov(u(s_i), u(s_j)) = \sigma_u^2\exp(-\phi_u d(s_i,s_j))
+#' }
+#' where \eqn{\phi_u} corresponds to inverse range parameter. 
+#' 
+#' The prior setting can be controlled with "priors" argument. 
+#' Prior for regression coefficients are independent normal or t prior centered at 0.
+#' "priors" is a named list of:  
+#' \itemize{
+#' \item beta_intercept_scale, Default 100, the scale of the intercept prior
+#' \item beta_scale, Default 100, the scale of nonintercept fixed-effect coefficients
+#' \item beta_df, Default Inf, degree of freedom of t prior. If `beta_df=Inf`, it corresponds to normal prior
+#' \item lambda_grid, Default 1:70, candidate for lambda (integer)
+#' \item lambda_logprior, Default \eqn{p(\lambda)\propto \lambda \Gamma(\lambda+1)/\Gamma(\lambda+5)}, log-prior of lambda. Default choice arises from beta negative binomial distribution; \eqn{(\lambda-1)\mid \psi \sim negbin(2,\psi), \psi\sim Beta(2,2)}. 
+#' \item logprior_sigma.sq, Default half-Cauchy on the sd(u) \eqn{=\sigma_u}, log prior of var(u)\eqn{=\sigma_u^2}
+#' \item phi_lb, lower bound of uniform prior of \eqn{\phi_u} (inverse range parameter of spatial random effect). Can be same as phi_ub
+#' \item phi_ub, lower bound of uniform prior of \eqn{\phi_u} (inverse range parameter of spatial random effect). Can be same as phi_lb
+#' }
 #'
-#' @param formula
-#' @param data
-#' @param link
-#' @param coords
-#' @param NNGP
-#' @param contrasts
-#' @param priors
-#' @param nngp.control
-#' @param nburn
-#' @param nsave
-#' @param nthin
-#' @import lme4
-#' @import Matrix
+#' @param formula an object of class "\link[stats]{formula}" or a two-sided linear formula object describing both the fixed-effects and random-effects part of the model; see "\link[lme4]{lmer}" 
+#' @param data data frame, list or environment (or object coercible by as.data.frame to a data frame) containing the variables in the model.
+#' @param link character, link function (default "cobit"). Only supports canonical link function "cobit" that is compatible with Kolmogorov-Gamma augmentation. 
+#' @param coords a n x 2 matrix of Euclidean coordinates
+#' @param NNGP logical, if TRUE, use NNGP prior for the spatial random effects; see \link[spNNGP]{spNNGP}
+#' @param contrasts an optional list. See the contrasts.arg of \link[stats]{model.matrix.default}.
+#' @param priors a list of prior hyperparameters. See Details
+#' @param nngp.control a list of control parameters for NNGP prior (only when NNGP = TRUE). This should be a named list of n.neighbors and ord, with default of 15 and first coordiate-based ordering. See \link[spNNGP]{spNNGP} for details.
+#' @param nburn number of burn-in MCMC iterations.
+#' @param nsave number of posterior samples. Total MCMC iteration is nburn + nsave*nthin
+#' @param nthin thin-in rate. Total MCMC iteration is nburn + nsave*nthin
 #' @import spNNGP
+#' @import lme4
+#' @import fields
+#' @import coda
 #'
-#' @returns
+#' @returns Returns list of 
+#' \item{post_save}{a matrix of posterior samples (coda::mcmc) with nsave rows}
+#' \item{post_u_save}{a matrix of posterior samples (coda::mcmc) of random effects, with nsave rows}
+#' \item{loglik_save}{a nsave x n matrix of pointwise log-likelihood values, can be used for WAIC calculation.}
+#' \item{priors}{list of hyperprior information}
+#' \item{nsave}{number of MCMC samples}
+#' \item{t_mcmc}{wall-clock time for running MCMC}
+#' \item{t_premcmc}{wall-clock time for preprocessing before MCMC}
+#' \item{y}{response vector}
+#' \item{X}{fixed effect design matrix}
+#' \item{coords}{a n x 2 matrix of Euclidean coordinates}
+#' if NNGP = TRUE, also returns
+#' \item{nngp.control}{a list of control parameters for NNGP prior}
+#' \item{spNNGPfit}{an "NNGP" class with empty samples, placeholder for prediction}
+#' 
+#' 
 #' @export
 #'
 #' @examples
+#' \dontrun{
+#'  # please see https://github.com/changwoo-lee/cobin-reproduce/blob/main/Sec6_mmicasestudy/results_main_n949/run_n949.R
+#' }
 spcobinreg <- function(formula, data, link = "cobit",
                        coords, NNGP = FALSE, contrasts = NULL,
                      priors = list(beta_intercept_scale = 10,
@@ -141,120 +180,3 @@ spcobinreg <- function(formula, data, link = "cobit",
 }
 
 
-
-
-
-#
-#
-#
-#
-#
-#
-#
-
-
-
-# 
-# 
-# # example: spatial model
-# # 
-# # Define parameters
-# n <- 1000
-# p <- 1
-# X <- matrix(rnorm(n * p), n, p)
-# beta <- 1  # without intercept
-# 
-# library(fields)
-# coords = cbind(runif(n), runif(n))
-# dmat = rdist(coords)
-# Sigma = 1*Matern(dmat, range = 1/0.1, smoothness = 0.5)
-# u =as.numeric(mvnfast::rmvn(1, rep(0, n), Sigma))
-# y = rcobin(n, X%*%beta + u, rep(10, n))
-# 
-# df = data.frame(y = y, X=X)
-# 
-# quilt.plot(coords, u - mean(u))
-# 
-# myout1 = spcobinreg(y ~ X, df, coords = coords, NNGP = F, priors = list(phi_lb = 0.1, phi_ub = 0.1),
-#                     #nngp.control = list(n.neighbors = 30, ord = order(coords[, 1])),
-#                     nburn = 100, nsave = 1000, nthin = 1)
-# myout1$t_mcmc
-# quilt.plot(coords, colMeans(myout1$post_u_save))
-# summary(myout1$post_save)
-# plot(myout1$post_save)
-# summary(myout1$post_save[,"sigma.sq"])
-# 
-# library(GpGp)
-# myord = GpGp::order_maxmin(coords)
-# 
-# 
-# library(spNNGP)
-# myout2 = spcobinreg(y ~ X, df, coords = coords, NNGP = T, priors = list(phi_lb = 0.1, phi_ub = 0.1),
-#                    #nngp.control = list(n.neighbors = 30, ord = myord),
-#                    nburn = 100, nsave = 1000, nthin = 1)
-# myout2$t_mcmc
-# quilt.plot(coords, colMeans(myout2$post_u_save))
-# summary(myout2$post_save)
-# plot(myout2$post_save)
-# quilt.plot(coords, u)
-# bayesplot::mcmc_intervals(myout1$post_save)
-# bayesplot::mcmc_intervals(myout2$post_save)
-# # 
-# 
-# myout3 = spcobinreg(y ~ X, df, coords = coords, NNGP = T, priors = list(phi_lb = 0.1, phi_ub = 0.1),
-#                     #nngp.control = list(n.neighbors = 15, ord = myord),
-#                     nburn = 100, nsave = 1000, nthin = 1)
-# myout3$t_mcmc
-# quilt.plot(coords, colMeans(myout3$post_u_save))
-# summary(myout3$post_save)
-# plot(myout3$post_save)
-# quilt.plot(coords, u)
-# bayesplot::mcmc_intervals(myout1$post_save)
-# 
-# bayesplot::mcmc_intervals(myout2$post_save)
-# 
-# 
-# myout4 = spcobinreg(y ~ X, df, coords = coords, NNGP = T, priors = list(phi_lb = 0.1, phi_ub = 0.1),
-#                     nngp.control = list(n.neighbors = 15, ord = myord),
-#                     nburn = 100, nsave = 1000, nthin = 1)
-# myout4$t_mcmc
-# quilt.plot(coords, colMeans(myout4$post_u_save))
-# summary(myout4$post_save)
-# plot(myout4$post_save)
-# quilt.plot(coords, u)
-
-#
-# quilt.plot(coords, colMeans(myout$post_u_save))
-# plot(myout$post_save)
-#
-# ybinary = as.numeric(y>0.5)
-#
-# # these are just dummies
-# n.samples <- 1000
-# starting <- list("phi"=3/0.5, "sigma.sq"=5, "tau.sq"=1)
-# tuning <- list("phi"=0.5, "sigma.sq"=0.5, "tau.sq"=0.5)
-# priors <- list("phi.Unif"=c(3/1, 3/0.01), "sigma.sq.IG"=c(2, 5), "tau.sq.IG"=c(2, 1))
-# cov.model <- "exponential"
-#
-# spNNGPfit = spNNGP(y ~ X, data = df, coords = coords, method = "latent", family = "gaussian",
-#                    n.neighbors = nngp.control$n.neighbors,
-#                    starting=starting, tuning=tuning,
-#                    family = "gaussian", n.neighbors = 15, priors=priors, cov.model=cov.model,
-#                    n.samples=n.samples, return.neighbor.info = TRUE)
-#
-# spNNGPfit$n.neighbors
-# spNNGPfit$cov.model
-#
-# str(spNNGPfit$neighbor.info)
-#
-#
-# ntest = 900
-# coords_test = expand.grid(x = seq(0,1, length=30), y = seq(0,1, length=30))
-# coords_test = as.matrix(coords_test)
-# s.pred <- predict(spNNGPfit, X.0=cbind(1,rep(0,ntest)), coords.0=coords_test,
-#                   sub.sample=list(start=501, thin=1),
-#                   n.report=1000)
-#
-# str(s.pred)
-#
-# quilt.plot(coords_test, rowMeans(s.pred$p.w.0))

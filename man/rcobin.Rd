@@ -29,9 +29,9 @@ The random variate generation is based on the fact that \eqn{cobin(\theta, \lamb
 Random variate generation for continuous Bernoulli is done by inverse cdf transform method.
 }
 \examples{
-
+\dontrun{
 hist(rcobin(1000, 2, 3), freq = FALSE)
 xgrid = seq(0, 1, length = 500)
 lines(xgrid, dcobin(xgrid, 2, 3))
-
+}
 }

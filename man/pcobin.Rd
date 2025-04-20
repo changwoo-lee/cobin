@@ -25,10 +25,10 @@ where \eqn{B(\theta) = \log\{(e^\theta - 1)/\theta\}} and \eqn{h(y;\lambda) = \f
 When \eqn{\lambda = 1}, it becomes continuous Bernoulli distribution.
 }
 \examples{
-
+\dontrun{
 xgrid = seq(0, 1, length = 500)
 out = pcobin(xgrid, 1, 2)
 plot(ecdf(rcobin(10000, 1, 2)))
 lines(xgrid, out, col = 2)
-
+}
 }

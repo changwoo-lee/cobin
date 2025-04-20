@@ -7,10 +7,12 @@
 bftprimeprime(x)
 }
 \arguments{
-\item{x}{}
+\item{x}{input vector}
+}
+\value{
+\eqn{B''(x) = 1/x^2 + 1/(2-2*\cosh(x))}
 }
 \description{
-B''(x) = 1/x^2 + 1/(2-2*cosh(x))
+\eqn{B''(x) = 1/x^2 + 1/(2-2*\cosh(x))}
 used Taylor series expansion for x near 0 for stability
-When g is canonical link, this is same as (g^(-1))'
 }

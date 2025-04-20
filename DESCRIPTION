@@ -1,9 +1,12 @@
 Package: cobin
-Title: continuous binomial regression
-Version: 0.0.1.7
+Title: cobin and micobin regression models
+Version: 1.0.0.0
 Authors@R: 
-    person("Changwoo", "Lee", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+    c(person("Changwoo", "Lee", email = "changwoo.lee@duke.edu", role = c("aut", "cre")),
+    person("Benjamin", "Dahl", role = c("aut")),
+    person("Otso", "Ovaskainen", role = c("aut")),
+    person("David", "Dunson", role = c("aut")))
+Description: Functions for cobin and micobin regression models, as well as sampler for Kolmogorov-Gamma random variable.  
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -11,6 +14,8 @@ RoxygenNote: 7.3.2
 LinkingTo: 
     Rcpp
 Imports: 
+    coda,
+    fields,
     lme4,
     Matrix,
     matrixStats,

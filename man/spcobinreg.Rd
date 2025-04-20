@@ -2,7 +2,7 @@
 % Please edit documentation in R/spcobinreg.R
 \name{spcobinreg}
 \alias{spcobinreg}
-\title{Title}
+\title{spatial cobin regression model}
 \usage{
 spcobinreg(
   formula,
@@ -18,6 +18,73 @@ spcobinreg(
   nthin = 1
 )
 }
+\arguments{
+\item{formula}{an object of class "\link[stats]{formula}" or a two-sided linear formula object describing both the fixed-effects and random-effects part of the model; see "\link[lme4]{lmer}"}
+
+\item{data}{data frame, list or environment (or object coercible by as.data.frame to a data frame) containing the variables in the model.}
+
+\item{link}{character, link function (default "cobit"). Only supports canonical link function "cobit" that is compatible with Kolmogorov-Gamma augmentation.}
+
+\item{coords}{a n x 2 matrix of Euclidean coordinates}
+
+\item{NNGP}{logical, if TRUE, use NNGP prior for the spatial random effects; see \link[spNNGP]{spNNGP}}
+
+\item{contrasts}{an optional list. See the contrasts.arg of \link[stats]{model.matrix.default}.}
+
+\item{priors}{a list of prior hyperparameters. See Details}
+
+\item{nngp.control}{a list of control parameters for NNGP prior (only when NNGP = TRUE). This should be a named list of n.neighbors and ord, with default of 15 and first coordiate-based ordering. See \link[spNNGP]{spNNGP} for details.}
+
+\item{nburn}{number of burn-in MCMC iterations.}
+
+\item{nsave}{number of posterior samples. Total MCMC iteration is nburn + nsave*nthin}
+
+\item{nthin}{thin-in rate. Total MCMC iteration is nburn + nsave*nthin}
+}
+\value{
+Returns list of
+\item{post_save}{a matrix of posterior samples (coda::mcmc) with nsave rows}
+\item{post_u_save}{a matrix of posterior samples (coda::mcmc) of random effects, with nsave rows}
+\item{loglik_save}{a nsave x n matrix of pointwise log-likelihood values, can be used for WAIC calculation.}
+\item{priors}{list of hyperprior information}
+\item{nsave}{number of MCMC samples}
+\item{t_mcmc}{wall-clock time for running MCMC}
+\item{t_premcmc}{wall-clock time for preprocessing before MCMC}
+\item{y}{response vector}
+\item{X}{fixed effect design matrix}
+\item{coords}{a n x 2 matrix of Euclidean coordinates}
+if NNGP = TRUE, also returns
+\item{nngp.control}{a list of control parameters for NNGP prior}
+\item{spNNGPfit}{an "NNGP" class with empty samples, placeholder for prediction}
+}
 \description{
-Title
+Fit Bayesian spatial cobin regression model under canonical link (cobit link) with Markov chain Monte Carlo (MCMC).
+\deqn{
+ y(s_{i}) \mid x(s_{i}), u(s_i) \stackrel{ind}{\sim} cobin(x(s_{i})^T\beta + u(s_i), \lambda^{-1}), \quad u(\cdot)\sim GP
+}
+for \eqn{i=1,\dots,n}. See \link[cobin]{dcobin} for details on cobin distribution. It currently only supports mean zero GP with exponential covariance
+\deqn{
+  cov(u(s_i), u(s_j)) = \sigma_u^2\exp(-\phi_u d(s_i,s_j))
+}
+where \eqn{\phi_u} corresponds to inverse range parameter.
+}
+\details{
+The prior setting can be controlled with "priors" argument.
+Prior for regression coefficients are independent normal or t prior centered at 0.
+"priors" is a named list of:
+\itemize{
+\item beta_intercept_scale, Default 100, the scale of the intercept prior
+\item beta_scale, Default 100, the scale of nonintercept fixed-effect coefficients
+\item beta_df, Default Inf, degree of freedom of t prior. If \code{beta_df=Inf}, it corresponds to normal prior
+\item lambda_grid, Default 1:70, candidate for lambda (integer)
+\item lambda_logprior, Default \eqn{p(\lambda)\propto \lambda \Gamma(\lambda+1)/\Gamma(\lambda+5)}, log-prior of lambda. Default choice arises from beta negative binomial distribution; \eqn{(\lambda-1)\mid \psi \sim negbin(2,\psi), \psi\sim Beta(2,2)}.
+\item logprior_sigma.sq, Default half-Cauchy on the sd(u) \eqn{=\sigma_u}, log prior of var(u)\eqn{=\sigma_u^2}
+\item phi_lb, lower bound of uniform prior of \eqn{\phi_u} (inverse range parameter of spatial random effect). Can be same as phi_ub
+\item phi_ub, lower bound of uniform prior of \eqn{\phi_u} (inverse range parameter of spatial random effect). Can be same as phi_lb
+}
+}
+\examples{
+\dontrun{
+ # please see https://github.com/changwoo-lee/cobin-reproduce/blob/main/Sec6_mmicasestudy/results_main_n949/run_n949.R
+}
 }

@@ -7,9 +7,12 @@
 bftprimeprimeprime(x)
 }
 \arguments{
-\item{x}{}
+\item{x}{input vector}
+}
+\value{
+\eqn{B'''(x) = 1/(4*\tanh(x/2)*\sinh(x/2)^2) - 2/x^3}
 }
 \description{
-B'''(x) = 1/(4*tanh(x/2)*sinh(x/2)^2) - 2/x^3
+\eqn{B'''(x) = 1/(4*\tanh(x/2)*\sinh(x/2)^2) - 2/x^3}
 used Taylor series expansion for x near 0 for stability
 }

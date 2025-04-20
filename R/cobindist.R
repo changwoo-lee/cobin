@@ -18,11 +18,11 @@
 #' @export
 #'
 #' @examples
-#' 
+#' \dontrun{
 #' hist(rcobin(1000, 2, 3), freq = FALSE)
 #' xgrid = seq(0, 1, length = 500)
 #' lines(xgrid, dcobin(xgrid, 2, 3))
-#' 
+#' }
 rcobin <- function(n, theta, lambda){
   # check lambda is integer
   if(any(lambda %% 1 != 0)){
@@ -71,13 +71,13 @@ rcobin <- function(n, theta, lambda){
 #'
 #'
 #' @examples
-#' 
+#' \dontrun{
 #' xgrid = seq(0, 1, length = 500)
 #' plot(xgrid, dcobin(xgrid, 0, 1), type="l", ylim = c(0,3)) # uniform 
 #' lines(xgrid, dcobin(xgrid, 0, 3))
 #' plot(xgrid, dcobin(xgrid, 2, 3), type="l")
 #' lines(xgrid, dcobin(xgrid, -2, 3))
-#' 
+#' }
 dcobin <- function(x, theta, lambda, log = FALSE){
   n = length(x)
   if(length(theta) == 1) theta = rep(theta, n)
@@ -118,12 +118,12 @@ dcobin <- function(x, theta, lambda, log = FALSE){
 #' @export
 #'
 #' @examples
-#' 
+#' \dontrun{
 #' xgrid = seq(0, 1, length = 500)
 #' out = pcobin(xgrid, 1, 2)
 #' plot(ecdf(rcobin(10000, 1, 2)))
 #' lines(xgrid, out, col = 2)
-#' 
+#' }
 pcobin <- function(q, theta, lambda){
   if(length(lambda)!=1) stop("lambda must be scalar")
   # check lambda is integer
@@ -141,7 +141,7 @@ pcobin <- function(q, theta, lambda){
     return(pcobin_numerical(q, theta, lambda))
   }else if(lambda > 60){
     #warning("normal cdf approximation used for lambda > 60 due to numerical stability")
-    return(pnorm(q, mean = cobin::bftprime(theta), sd = sqrt(cobin:::vcobin(theta,lambda))))
+    return(pnorm(q, mean = bftprime(theta), sd = sqrt(vcobin(theta,lambda))))
   }
   if(theta < 0){
     out = pcobin_negtheta(q, theta, lambda)

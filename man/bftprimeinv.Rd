@@ -2,18 +2,27 @@
 % Please edit documentation in R/varfunctions.R
 \name{bftprimeinv}
 \alias{bftprimeinv}
+\alias{cobitlink}
 \title{Inverse of first derivative of cobin cumulant (log partition) function}
 \usage{
 bftprimeinv(y, x0 = 0, tol = 1e-08, maxiter = 100)
+
+cobitlink(y, x0 = 0, tol = 1e-08, maxiter = 100)
 }
 \arguments{
-\item{x0}{initial value}
+\item{y}{input vector}
+
+\item{x0}{Defult 0, initial value}
 
 \item{tol}{tolerance, stopping criterion for Newton-Raphson}
 
 \item{maxiter}{max iteration of Newton-Raphson}
 }
+\value{
+\eqn{(B')^{-1}(y)}
+}
 \description{
-Calculates (B')^(-1)(y) using numerical inversion (Newton-Raphson)
-This is the cobit link function g, the canonical link function of cobin
+Calculates \eqn{(B')^{-1}(y)} using numerical inversion (Newton-Raphson),
+where \eqn{B'(x) = 1/(1-\exp(-x))-1/x}.
+This is the cobit link function g, the canonical link function of cobin.
 }

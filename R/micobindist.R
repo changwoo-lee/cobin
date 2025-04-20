@@ -64,10 +64,11 @@ rmicobin <- function(n, theta, psi, r = 2){
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' hist(rcobin(1000, 2, 3), freq = FALSE)
 #' xgrid = seq(0, 1, length = 500)
 #' lines(xgrid, dcobin(xgrid, 2, 3))
-#' 
+#' }
 dmicobin <- function(x, theta, psi, r = 2, log = FALSE, l_max = 70){
   n = length(x)
 #  if(length(psi) != 1){
@@ -94,36 +95,6 @@ dmicobin <- function(x, theta, psi, r = 2, log = FALSE, l_max = 70){
     return(exp(logdensity))
   }
 }
-# 
-# dmicobinold <- function(x, theta, psi, r = 2, log = FALSE, l_max = 70){
-#   n = length(x)
-#   if(length(psi) != 1){
-#     stop("psi must be scalar")
-#   }
-#   if(length(theta) == 1) theta = rep(theta, length(x))
-#   #if(length(psi) == 1) psi = rep(psi, length(x))
-#   stopifnot("length of theta should be either 1 or length(x)" = (length(theta) == length(x)))
-#   #stopifnot("length of psi should be either 1 or length(x)" = (length(psi) == length(x)))
-#   
-#   logdensity_summand = matrix(-Inf, l_max, length(x))
-#   error = (1-pnbinom(l_max-1, r, psi, log = FALSE))
-#   if(error > 0.0001) warning("m_max is too small and density may be off by 0.0001. Increase l_max.")
-#   for(l in 1:l_max){
-#     logdensity_summand[l,] = dnbinom(l - 1, r, psi, log = T) + dcobin(x, theta, l, log = T)
-#   }
-#   logdensity = matrixStats::colLogSumExps(logdensity_summand)
-#   if(log){
-#     return(logdensity)
-#   }else{
-#     return(exp(logdensity))
-#   }
-# }
-# 
-# dcobin(c(0.5,0.2), theta = c(2,2), lambda = c(2,2))
-# xgrid = seq(0, 1, length = 1000)
-# plot(xgrid, dmicobin(xgrid, theta = 2, 1/2, log = F))
-# lines(xgrid, dmicobinold(xgrid, theta = 2, 1/2, log = F), col = 2)
-
 
 #' Cumulative distribution function of micobin (mixture of continuous binomial) distribution
 #' 
@@ -143,10 +114,12 @@ dmicobin <- function(x, theta, psi, r = 2, log = FALSE, l_max = 70){
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' xgrid = seq(0, 1, length = 500)
 #' out = pmicobin(xgrid, 1, 1/2)
 #' plot(ecdf(rmicobin(10000, 1, 1/2)))
 #' lines(xgrid, out, col = 2)
+#' }
 pmicobin <- function(q, theta, psi, r = 2, l_max = 70){
   if(length(psi) != 1){
     stop("psi must be scalar")
@@ -163,19 +136,6 @@ pmicobin <- function(q, theta, psi, r = 2, l_max = 70){
   cdf = colSums(cdf_summand)
   return(cdf)
 }
-
-# xgrid = seq(0.0001, 0.9999, length.out = 200)
-# theta  = 5
-# psi = 0.2
-# draws = rcobin(10000, theta, 5)
-# hist(draws)
-# plot(ecdf(draws))
-# lines(xgrid, pcobin(xgrid, theta, 5), col = 2); abline(v=0); abline(v=1)
-# 
-# draws = rmicobin(10000, theta, psi)
-# hist(draws)
-# plot(ecdf(draws))
-# lines(xgrid, pmicobin(xgrid, theta, psi), col = 2); abline(v=0); abline(v=1)
 
 emicobin <- function(eta){
   bftprime(eta)
