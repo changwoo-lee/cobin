@@ -1,7 +1,8 @@
 Package: cobin
 Title: cobin and micobin regression models
 Version: 1.0.0.1
-Description: Functions for cobin and micobin regression models, as well as sampler for Kolmogorov-Gamma random variable.  
+Authors@R: Anonymous authors (for double-blinded peer review)
+Description: Functions for continuous binomial (cobin) and dispersion mixture of continuous binomial (micobin) regression models, as well as sampler for Kolmogorov-Gamma random variable.  
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
