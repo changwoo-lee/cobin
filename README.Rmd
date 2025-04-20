@@ -16,12 +16,6 @@ knitr::opts_chunk$set(
 
 <!-- badges: start -->
 <!-- badges: end -->
-Install the package from GitHub using the following code (token is this repository-specific; will be removed when repo becomes public):
-```{r, eval = F}
-# install.packages("devtools")
-devtools::install_github("changwoo-lee/cobin", auth_token = "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")
-
-```
 
 Glossaries: GLM: generalized linear model; GLMM: generalized linear mixed model;
 GP: Gaussian process; NNGP: nearest neighbor Gaussian process; 
