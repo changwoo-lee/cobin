@@ -1,6 +1,6 @@
 Package: cobin
 Title: cobin and micobin regression models
-Version: 1.0.0.0
+Version: 1.0.0.1
 Description: Functions for cobin and micobin regression models, as well as sampler for Kolmogorov-Gamma random variable.  
 License: MIT + file LICENSE
 Encoding: UTF-8
