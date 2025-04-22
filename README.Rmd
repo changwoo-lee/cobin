@@ -12,21 +12,30 @@ knitr::opts_chunk$set(
   out.width = "100%"
 )
 ```
-# cobin: R package for continuous binomial (cobin) regression and extensions
+# cobin: R package for cobin and micobin regression models
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-Install the package from GitHub using the following code (token is this repository-specific; will be removed when repo becomes public):
+Cobin and micobin regression models are scalable and robust alternative to beta regression model for continuous proportional data. See the following paper for more details:
+
+> Lee, C. J., Dahl, B. K., Ovaskainen, O., Dunson, D. B. (2025). Scalable and robust regression models for continuous proportional data. arXiv preprint arXIV:2504.15269 https://arxiv.org/abs/2504.15269
+
+A dedicated Github repository for reproducing the analysis in the paper is available at https://github.com/changwoo-lee/cobin-reproduce. This R package repository contains the functions for the cobin and micobin regression models, as well as sampler for Kolmogorov-Gamma random variables.
+
+Install the package from GitHub:
 ```{r, eval = F}
 # install.packages("devtools")
-devtools::install_github("changwoo-lee/cobin", auth_token = "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")
-
+devtools::install_github("changwoo-lee/cobin")
 ```
 
 Glossaries: GLM: generalized linear model; GLMM: generalized linear mixed model;
 GP: Gaussian process; NNGP: nearest neighbor Gaussian process; 
 cobin: continuous binomial; micobin: mixture of continuous binomial;
+
+### vignette
+
+To be added soon!
 
 ## Code structure
 
