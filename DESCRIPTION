@@ -1,11 +1,20 @@
 Package: cobin
 Title: cobin and micobin regression models
 Version: 1.0.0.1
-Authors@R: 
-    c(person("Changwoo", "Lee", email = "changwoo.lee@duke.edu", role = c("aut", "cre")),
-    person("Benjamin", "Dahl", role = c("aut")),
-    person("Otso", "Ovaskainen", role = c("aut")),
-    person("David", "Dunson", role = c("aut")))
+Authors@R:
+  c(person("Changwoo",
+           "Lee", 
+           email = "changwoo.lee@duke.edu", 
+           role = c("aut", "cre")),
+    person("Benjamin",
+           "Dahl", 
+           role = c("aut")),
+    person("Otso", 
+           "Ovaskainen",
+           role = c("aut")),
+    person("David",
+           "Dunson",
+           role = c("aut")))
 Description: Functions for cobin and micobin regression models, as well as sampler for Kolmogorov-Gamma random variable.  
 License: MIT + file LICENSE
 Encoding: UTF-8
