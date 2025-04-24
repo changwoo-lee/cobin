@@ -17,8 +17,9 @@ following paper for more details:
 
 A dedicated Github repository for reproducing the analysis in the paper
 is available at <https://github.com/changwoo-lee/cobin-reproduce>. This
-R package repository contains the functions for the cobin and micobin regression
-models, as well as sampler for Kolmogorov-Gamma random variables.
+R package repository contains the functions for the cobin and micobin
+regression models, as well as sampler for Kolmogorov-Gamma random
+variables.
 
 Install the package from GitHub:
 
@@ -34,7 +35,16 @@ binomial;
 
 ### vignette
 
-To be added soon!
+[Comparison of cobin and beta
+density](https://changwoo-lee-stat.shinyapps.io/cobin_beta_comparison/)
+
+[Comparison of micobin and beta
+density](https://changwoo-lee-stat.shinyapps.io/micobin_beta_comparison/)
+
+Please see [MMI data analysis
+code](https://github.com/changwoo-lee/cobin-reproduce/blob/main/Sec6_mmicasestudy/results_main_n949/run_n949.R)
+corresponding to the Section 6 of the
+paper(<https://arxiv.org/abs/2504.15269>). More detailed examples TBA.
 
 ## Code structure
 
