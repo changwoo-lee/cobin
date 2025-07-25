@@ -60,7 +60,7 @@
 #'
 #' @examples
 #' \dontrun{
-#'  # please see https://anonymous.4open.science/r/cobin-reproduce-3B96/Sec6_mmicasestudy/results_main_n949/run_n949.R
+#'  # Please see https://github.com/changwoo-lee/cobin-reproduce
 #' }
 spmicobinreg <- function(formula, data, link = "cobit",
                        coords, NNGP = FALSE, contrasts = NULL,

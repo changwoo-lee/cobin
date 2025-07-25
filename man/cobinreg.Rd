@@ -33,6 +33,10 @@ cobinreg(
 \item{nsave}{number of posterior samples. Total MCMC iteration is nburn + nsave*nthin}
 
 \item{nthin}{thin-in rate. Total MCMC iteration is nburn + nsave*nthin}
+
+\item{MH}{logical, Metropolis-Hastings; experimental}
+
+\item{lambda_fixed}{logical, fixing lambda; experimental}
 }
 \value{
 Returns list of

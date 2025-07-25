@@ -14,13 +14,13 @@ build_Q_exponential <- function(distmat, sigma.sq, phi,
     A[i+1, Nlist[[i+1]]]= temp
     D[i+1]= R[i+1, i+1] - sum(R[i+1, Nlist[[i+1]]]*temp)
   }
-  A = as(A, "dgCMatrix")
+  A = methods::as(A, "dgCMatrix")
 
   Dmat = Matrix::Diagonal(n, x = D)
   Q_reordered = Matrix::t((Matrix::Diagonal(n) - A))%*%Matrix::solve(Dmat)%*%(Matrix::Diagonal(n) - A)
   #Linv =  Matrix::Diagonal(n, x = 1/sqrt(D))%*%(Matrix::Diagonal(n) - A)
   Q = Q_reordered[order(ord),order(ord)]
-  Q = as(Q, "dgCMatrix")
+  Q = methods::as(Q, "dgCMatrix")
   return(Q)
 }
 # 

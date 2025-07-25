@@ -32,6 +32,8 @@ micobinreg(
 \item{nsave}{number of posterior samples. Total MCMC iteration is nburn + nsave*nthin}
 
 \item{nthin}{thin-in rate. Total MCMC iteration is nburn + nsave*nthin}
+
+\item{psi_fixed}{logical, fixing psi; experimental}
 }
 \value{
 Returns list of

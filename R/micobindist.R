@@ -82,8 +82,8 @@ dmicobin <- function(x, theta, psi, r = 2, log = FALSE, l_max = 70){
   logdensity_summand = matrix(-Inf, l_max, n)
 #  logweight_summand = matrix(-Inf, l_max, n)
  # for(l in 1:l_max) logweight_summand[l,] = dnbinom(l - 1, r, psi, log = T)
-  logconst = pnbinom(l_max-1, r, psi, log = T)
-  maxerror = (1-pnbinom(l_max-1, r, psi, log = FALSE))
+  logconst = pnbinom(l_max-1, r, psi, log.p = TRUE)
+  maxerror = (1-pnbinom(l_max-1, r, psi, log.p = FALSE))
   if(any(maxerror > 0.0001)) warning("psi is small, so that deviation from truncated and untruncated may be large")
   for(l in 1:l_max){
     logdensity_summand[l,] = dnbinom(l - 1, r, psi, log = T) - logconst + dcobin(x, theta, l, log = T)
@@ -128,7 +128,7 @@ pmicobin <- function(q, theta, psi, r = 2, l_max = 70){
     stop("theta must be scalar")
   }
   cdf_summand = matrix(0, l_max, length(q))
-  error = (1-pnbinom(l_max-1, r, psi, log = FALSE))
+  error = (1-pnbinom(l_max-1, r, psi, log.p = FALSE))
   if(error > 0.0001) warning("l_max may be too small")
   for(l in 1:l_max){
     cdf_summand[l,] = dnbinom(l - 1, r, psi)*pcobin(q, theta, l)

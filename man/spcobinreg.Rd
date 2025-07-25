@@ -85,6 +85,6 @@ Prior for regression coefficients are independent normal or t prior centered at 
 }
 \examples{
 \dontrun{
- # please see https://anonymous.4open.science/r/cobin-reproduce-3B96/Sec6_mmicasestudy/results_main_n949/run_n949.R
+ # Please see https://github.com/changwoo-lee/cobin-reproduce
 }
 }

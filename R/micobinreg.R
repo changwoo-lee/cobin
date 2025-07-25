@@ -34,7 +34,9 @@
 #' @param priors a list of prior hyperparameters. See Details
 #' @param nburn number of burn-in MCMC iterations.
 #' @param nsave number of posterior samples. Total MCMC iteration is nburn + nsave*nthin
+#' @param psi_fixed logical, fixing psi; experimental
 #' @param nthin thin-in rate. Total MCMC iteration is nburn + nsave*nthin
+#'
 #' @import lme4
 #' @import Matrix
 #' @import coda

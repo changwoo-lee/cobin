@@ -1,6 +1,6 @@
 Package: cobin
-Title: cobin and micobin regression models
-Version: 1.0.0.1
+Title: continuous binomial (cobin) and mixture of continuous binomial (micobin) regression models
+Version: 1.0.1.0
 Authors@R:
   c(person("Changwoo",
            "Lee", 
@@ -15,7 +15,7 @@ Authors@R:
     person("David",
            "Dunson",
            role = c("aut")))
-Description: Functions for cobin and micobin regression models, as well as sampler for Kolmogorov-Gamma random variable.  
+Description: Functions for cobin and micobin regression models, as well as sampler for Kolmogorov-Gamma random variable. For details, see Lee, Dahl, Ovaskainen, Dunson (2025+)  <https://doi.org/10.48550/arXiv.2504.15269>. 
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -28,7 +28,9 @@ Imports:
     lme4,
     Matrix,
     matrixStats,
+    methods,
     Rcpp,
     spam,
-    spNNGP
-
+    spNNGP,
+    stats,
+    utils
