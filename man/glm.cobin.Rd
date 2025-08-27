@@ -47,15 +47,19 @@ Note that MLE of regression coefficient does not depends on lambda.
 Since dispersion parameter lambda is discrete, it does not provide standard error of lambda. With cobit link, we strongly encourage Bayesian approaches, using \code{cobin::cobinreg()} function.
 }
 \examples{
-\dontrun{
-data("GasolineYield", package = "betareg")
-# frequentist
+ 
+\donttest{
+requireNamespace("betareg", quietly = TRUE)
+library(betareg)# for dataset example
+data(GasolineYield, package = "betareg")
+# cobin regression, frequentist
 out_freq = glm.cobin(yield ~ temp, data = GasolineYield, link = "cobit")
 summary(out_freq) 
-# Bayesian (strongly encouraged)
+# cobin regression, Bayesian
 out = cobinreg(yield ~ temp, data = GasolineYield, 
                nsave = 10000, link = "cobit")
 summary(out$post_save)
 plot(out$post_save)
 }
+
 }

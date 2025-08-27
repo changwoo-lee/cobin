@@ -35,7 +35,7 @@ fit_micobin_spatial_NNGP <- function(y, X, coords, distmat, priors, ord = ord, N
                           ord = ord)
   logdetQ = Matrix::determinant(Q, logarithm = TRUE)$modulus
   Q = as(as(Q, "generalMatrix"), "CsparseMatrix")
-  print(paste0(round(100-(Matrix::nnzero(Q)-n)/(n^2-n)*100,2), "% of off-diagonal entries of precision matrix is zero"))
+  message(paste0(round(100-(Matrix::nnzero(Q)-n)/(n^2-n)*100,2), "% of off-diagonal entries of precision matrix is zero"))
   Q = spam::as.spam.dgCMatrix(Q)# spam object
   #Qinvlogdet = -determinant(Q, logarithm = TRUE)$modulus
   Q_spamstruct = spam::chol(Q)

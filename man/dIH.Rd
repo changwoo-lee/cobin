@@ -4,7 +4,7 @@
 \alias{dIH}
 \title{Density of Irwin-Hall distribution}
 \usage{
-dIH(x, m, log = F)
+dIH(x, m, log = FALSE)
 }
 \arguments{
 \item{x}{vector of quantities, between 0 and m}
@@ -31,14 +31,13 @@ The density of Bates distribution, defined as an average of m uniform (0,1) dist
 Due to alternating series representation, m > 80 may yield numerical issues
 }
 \examples{
-\dontrun{
 m = 8
 xgrid= seq(0, m, length = 500)
-hist(colSums(matrix(runif(m*1000), nrow = m, ncol = 1000)), freq = F) 
+hist(colSums(matrix(runif(m*1000), nrow = m, ncol = 1000)), freq = FALSE) 
 lines(xgrid, dIH(xgrid, m, log = FALSE))
 # Bates distribution
 xgrid= seq(0, 1, length = 500)
-hist(colMeans(matrix(runif(m*1000), nrow = m, ncol = 1000)), freq = F) 
+hist(colMeans(matrix(runif(m*1000), nrow = m, ncol = 1000)), freq = FALSE) 
 lines(xgrid, m*dIH(xgrid*m, m, log = FALSE))
-}
+
 }

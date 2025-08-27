@@ -59,7 +59,9 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
+#' requireNamespace("betareg", quietly = TRUE)
+#' library(betareg) # for dataset example
 #' data("GasolineYield", package = "betareg")
 #' 
 #' # basic model 
@@ -77,7 +79,7 @@
 cobinreg <- function(formula, data, link = "cobit", contrasts = NULL,
                      priors = list(beta_intercept_scale = 100,
                                    beta_scale = 100, beta_df = Inf),
-                     nburn = 1000, nsave = 1000, nthin = 1, MH = F, lambda_fixed = NULL){
+                     nburn = 1000, nsave = 1000, nthin = 1, MH = FALSE, lambda_fixed = NULL){
   if(link != "cobit") stop("only supports cobit link")
 
   isZ = length(lme4::findbars(formula)) > 0

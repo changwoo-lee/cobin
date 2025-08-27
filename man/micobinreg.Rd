@@ -79,7 +79,9 @@ if random intercept model, u ~ InvGamma(a_u,b_u) with
 }
 }
 \examples{
-\dontrun{
+\donttest{
+requireNamespace("betareg", quietly = TRUE)
+library(betareg)# for dataset example
 data("GasolineYield", package = "betareg")
 
 # basic model 

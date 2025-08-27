@@ -26,9 +26,9 @@ The random variate generation is based on alternating series method, a fast and 
 This function only supports integer b, which is sufficient for cobin and micobin regression models.
 }
 \examples{
-\dontrun{
-rkgcpp(1000, 1, 2)
-rkgcpp(1000, 1, rnorm(1000))
-rkgcpp(1000, rep(c(1,2),500), rnorm(1000))
+\donttest{
+rkgcpp(100, 1, 2)
+rkgcpp(100, 1, rnorm(100))
+rkgcpp(100, rep(c(1,2),50), rnorm(100))
 }
 }

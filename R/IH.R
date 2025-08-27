@@ -21,17 +21,16 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' m = 8
 #' xgrid= seq(0, m, length = 500)
-#' hist(colSums(matrix(runif(m*1000), nrow = m, ncol = 1000)), freq = F) 
+#' hist(colSums(matrix(runif(m*1000), nrow = m, ncol = 1000)), freq = FALSE) 
 #' lines(xgrid, dIH(xgrid, m, log = FALSE))
 #' # Bates distribution
 #' xgrid= seq(0, 1, length = 500)
-#' hist(colMeans(matrix(runif(m*1000), nrow = m, ncol = 1000)), freq = F) 
+#' hist(colMeans(matrix(runif(m*1000), nrow = m, ncol = 1000)), freq = FALSE) 
 #' lines(xgrid, m*dIH(xgrid*m, m, log = FALSE))
-#' }
-dIH <- function(x, m, log = F){
+#' 
+dIH <- function(x, m, log = FALSE){
   n = length(x)
   if(length(m)==1) m = rep(m, n)
   stopifnot("length of m should be either 1 or length(x)" = (length(m) == length(x)))

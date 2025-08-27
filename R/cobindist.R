@@ -18,11 +18,10 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' hist(rcobin(1000, 2, 3), freq = FALSE)
 #' xgrid = seq(0, 1, length = 500)
 #' lines(xgrid, dcobin(xgrid, 2, 3))
-#' }
+#' 
 rcobin <- function(n, theta, lambda){
   # check lambda is integer
   if(any(lambda %% 1 != 0)){
@@ -71,13 +70,13 @@ rcobin <- function(n, theta, lambda){
 #'
 #'
 #' @examples
-#' \dontrun{
+#' 
 #' xgrid = seq(0, 1, length = 500)
 #' plot(xgrid, dcobin(xgrid, 0, 1), type="l", ylim = c(0,3)) # uniform 
 #' lines(xgrid, dcobin(xgrid, 0, 3))
 #' plot(xgrid, dcobin(xgrid, 2, 3), type="l")
 #' lines(xgrid, dcobin(xgrid, -2, 3))
-#' }
+#' 
 dcobin <- function(x, theta, lambda, log = FALSE){
   n = length(x)
   if(length(theta) == 1) theta = rep(theta, n)
@@ -91,7 +90,7 @@ dcobin <- function(x, theta, lambda, log = FALSE){
   # if(length(theta) != n | length(lambda) != 1){
   #   stop("length of theta should be either 1 or length of x, and leegnth of lambda must be 1")
   # }
-  logdensity = log(lambda) + dIH(lambda*x, lambda, log = T) + lambda*theta*x - lambda*bft(theta)
+  logdensity = log(lambda) + dIH(lambda*x, lambda, log = TRUE) + lambda*theta*x - lambda*bft(theta)
   if(log){
     return(logdensity)
   }else{
@@ -118,12 +117,12 @@ dcobin <- function(x, theta, lambda, log = FALSE){
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' 
 #' xgrid = seq(0, 1, length = 500)
 #' out = pcobin(xgrid, 1, 2)
 #' plot(ecdf(rcobin(10000, 1, 2)))
 #' lines(xgrid, out, col = 2)
-#' }
+#' 
 pcobin <- function(q, theta, lambda){
   if(length(lambda)!=1) stop("lambda must be scalar")
   # check lambda is integer
@@ -189,7 +188,7 @@ pIH01 <- function(q, lambda, log = F){
   }
 }
 
-pcobin_negtheta2 <- function(q, theta, lambda, log = F){
+pcobin_negtheta2 <- function(q, theta, lambda, log = FALSE){
   n = length(q)
   summand_mat = matrix(0, lambda+1, n)
   common = log(lambda) + lchoose(lambda, 0:lambda) - lambda*bft(theta)

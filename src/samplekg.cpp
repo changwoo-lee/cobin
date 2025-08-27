@@ -246,10 +246,10 @@ double rkg_b(int b, double z) {
 //' @param c Second parameter, real, associated with tilting. Length must be 1 or n.
 //' @return It returns n independent Kolmogorov-Gamma(\code{b[i]},\code{c[i]}) samples. If input b or c is scalar, it is assumed to be length n vector with same entries.  
 //' @examples
-//' \dontrun{
-//' rkgcpp(1000, 1, 2)
-//' rkgcpp(1000, 1, rnorm(1000))
-//' rkgcpp(1000, rep(c(1,2),500), rnorm(1000))
+//' \donttest{
+//' rkgcpp(100, 1, 2)
+//' rkgcpp(100, 1, rnorm(100))
+//' rkgcpp(100, rep(c(1,2),50), rnorm(100))
 //' }
 //' @export
 // [[Rcpp::export]]

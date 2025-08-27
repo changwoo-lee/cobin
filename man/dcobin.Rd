@@ -30,11 +30,11 @@ When \eqn{\lambda = 1}, it becomes continuous Bernoulli distribution.
 For the evaluation of \eqn{h(y;\lambda)}, see \code{?cobin::dIH}.
 }
 \examples{
-\dontrun{
+
 xgrid = seq(0, 1, length = 500)
 plot(xgrid, dcobin(xgrid, 0, 1), type="l", ylim = c(0,3)) # uniform 
 lines(xgrid, dcobin(xgrid, 0, 3))
 plot(xgrid, dcobin(xgrid, 2, 3), type="l")
 lines(xgrid, dcobin(xgrid, -2, 3))
-}
+
 }

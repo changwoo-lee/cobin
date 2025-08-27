@@ -28,7 +28,8 @@ Micobin distribution with natural parameter \eqn{\theta} and dispersion \eqn{psi
 so that micobin cdf is a weighted sum of cobin cdf with negative binomial weights.
 }
 \examples{
-\dontrun{
+
+\donttest{
 xgrid = seq(0, 1, length = 500)
 out = pmicobin(xgrid, 1, 1/2)
 plot(ecdf(rmicobin(10000, 1, 1/2)))

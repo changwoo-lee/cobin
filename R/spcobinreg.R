@@ -59,7 +59,7 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #'  # Please see https://github.com/changwoo-lee/cobin-reproduce
 #' }
 spcobinreg <- function(formula, data, link = "cobit",
@@ -119,7 +119,7 @@ spcobinreg <- function(formula, data, link = "cobit",
     phi_ub = 3/(max(distmat)/4); priors$phi_ub = phi_ub
   }
   if(priors$phi_lb == priors$phi_ub){
-    print("inverse range parameter fixed")
+    message("inverse range parameter fixed")
     priors$phi_fixed = TRUE
   } else{
     priors$phi_fixed = FALSE
@@ -135,7 +135,6 @@ spcobinreg <- function(formula, data, link = "cobit",
     nngppriors <- list("phi.Unif"=c(priors$phi_lb-1e-14, priors$phi_ub), "sigma.sq.IG"=c(2, 5))
 
     ybinary = as.numeric(y > 0.5)
-    print("running prelim spNNGP")
     spNNGPfit = spNNGP(formula, data = data, coords = coords,
                        method = "latent", family = "binomial", # this is not important
                        n.neighbors = nngp.control$n.neighbors,
@@ -144,8 +143,7 @@ spcobinreg <- function(formula, data, link = "cobit",
                        ord = nngp.control$ord,
                        n.samples=0, verbose = F,
                        return.neighbor.info = TRUE)
-    print("completed prelim spNNGP")
-
+    
     # initial phi
     #phi = mean(c(phi_lb, phi_ub))
     #sigma.sq = 1

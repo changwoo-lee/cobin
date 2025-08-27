@@ -30,9 +30,8 @@ Micobin distribution with natural parameter \eqn{\theta} and dispersion \eqn{psi
 so that micobin density is a weighted sum of cobin density with negative binomial weights.
 }
 \examples{
-\dontrun{
 hist(rcobin(1000, 2, 3), freq = FALSE)
 xgrid = seq(0, 1, length = 500)
 lines(xgrid, dcobin(xgrid, 2, 3))
-}
+
 }

@@ -1,6 +1,6 @@
 Package: cobin
-Title: Continuous Binomial (Cobin) and Mixture of Continuous Binomial (Micobin) Regression Models
-Version: 1.0.1.1
+Title: Cobin and Micobin Regression Models for Continuous Proportional Data
+Version: 1.0.1.3
 Authors@R:
   c(person("Changwoo",
            "Lee", 
@@ -36,3 +36,5 @@ Imports:
     spNNGP,
     stats,
     utils
+Suggests: 
+    betareg

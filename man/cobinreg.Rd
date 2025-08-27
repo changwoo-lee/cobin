@@ -13,7 +13,7 @@ cobinreg(
   nburn = 1000,
   nsave = 1000,
   nthin = 1,
-  MH = F,
+  MH = FALSE,
   lambda_fixed = NULL
 )
 }
@@ -82,7 +82,9 @@ if random intercept model, u ~ InvGamma(a_u,b_u) with
 }
 }
 \examples{
-\dontrun{
+\donttest{
+requireNamespace("betareg", quietly = TRUE)
+library(betareg) # for dataset example
 data("GasolineYield", package = "betareg")
 
 # basic model 

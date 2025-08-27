@@ -64,11 +64,10 @@ rmicobin <- function(n, theta, psi, r = 2){
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' hist(rcobin(1000, 2, 3), freq = FALSE)
 #' xgrid = seq(0, 1, length = 500)
 #' lines(xgrid, dcobin(xgrid, 2, 3))
-#' }
+#' 
 dmicobin <- function(x, theta, psi, r = 2, log = FALSE, l_max = 70){
   n = length(x)
 #  if(length(psi) != 1){
@@ -86,7 +85,7 @@ dmicobin <- function(x, theta, psi, r = 2, log = FALSE, l_max = 70){
   maxerror = (1-pnbinom(l_max-1, r, psi, log.p = FALSE))
   if(any(maxerror > 0.0001)) warning("psi is small, so that deviation from truncated and untruncated may be large")
   for(l in 1:l_max){
-    logdensity_summand[l,] = dnbinom(l - 1, r, psi, log = T) - logconst + dcobin(x, theta, l, log = T)
+    logdensity_summand[l,] = dnbinom(l - 1, r, psi, log = TRUE) - logconst + dcobin(x, theta, l, log = TRUE)
   }
   logdensity = matrixStats::colLogSumExps(logdensity_summand)
   if(log){
@@ -114,12 +113,13 @@ dmicobin <- function(x, theta, psi, r = 2, log = FALSE, l_max = 70){
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' 
+#' \donttest{
 #' xgrid = seq(0, 1, length = 500)
 #' out = pmicobin(xgrid, 1, 1/2)
 #' plot(ecdf(rmicobin(10000, 1, 1/2)))
 #' lines(xgrid, out, col = 2)
-#' }
+#'}
 pmicobin <- function(q, theta, psi, r = 2, l_max = 70){
   if(length(psi) != 1){
     stop("psi must be scalar")

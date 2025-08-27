@@ -58,7 +58,9 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
+#' requireNamespace("betareg", quietly = TRUE)
+#' library(betareg)# for dataset example
 #' data("GasolineYield", package = "betareg")
 #' 
 #' # basic model 
