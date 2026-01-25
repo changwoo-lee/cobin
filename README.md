@@ -4,16 +4,19 @@
 # cobin: R package for cobin and micobin regression models
 
 <!-- badges: start -->
+
 <!-- badges: end -->
 
 Cobin and micobin regression models are scalable and robust alternative
 to beta regression model for continuous proportional data. See the
 following paper for more details:
 
-> Lee, C. J., Dahl, B. K., Ovaskainen, O., Dunson, D. B. (2025).
+> Lee, C. J., Dahl, B. K., Ovaskainen, O., Dunson, D. B. (2026).
 > Scalable and robust regression models for continuous proportional
-> data. arXiv preprint arXIV:2504.15269
-> <https://arxiv.org/abs/2504.15269>
+> data. Journal of the American Statistical Association, in press.
+
+Preprint is available at <https://arxiv.org/abs/2504.15269>; the journal
+version will be updated soon.
 
 A dedicated Github repository for reproducing the analysis in the paper
 is available at <https://github.com/changwoo-lee/cobin-reproduce>. This
@@ -21,9 +24,11 @@ R package repository contains the functions for the cobin and micobin
 regression models, as well as sampler for Kolmogorov-Gamma random
 variables.
 
-Install the package from GitHub:
+Install the package:
 
 ``` r
+install.packages("cobin") # from CRAN
+# or the development version from GitHub
 # install.packages("devtools")
 devtools::install_github("changwoo-lee/cobin")
 ```
