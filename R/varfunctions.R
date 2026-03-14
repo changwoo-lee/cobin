@@ -34,8 +34,7 @@ bft <- function(x){
 bftprime = function(x){
   #out = 1/(1-exp(-x))-1/x
   out = -1/expm1(-x)-1/x
-  # if any element is NaN, replace NaN to 0.5
-  out[is.nan(out)] = 0.5
+  out[x==0] = 0.5
   out
 }
 
