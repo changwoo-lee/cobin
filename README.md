@@ -15,8 +15,8 @@ following paper for more details:
 > Scalable and robust regression models for continuous proportional
 > data. Journal of the American Statistical Association, in press.
 
-Preprint is available at <https://arxiv.org/abs/2504.15269>; the journal
-version will be updated soon.
+Preprint is available at <https://arxiv.org/abs/2504.15269> as well as a
+journal version at <https://doi.org/10.1080/01621459.2026.2626081>.
 
 A dedicated Github repository for reproducing the analysis in the paper
 is available at <https://github.com/changwoo-lee/cobin-reproduce>. This
@@ -47,9 +47,10 @@ density](https://changwoo-lee-stat.shinyapps.io/cobin_beta_comparison/)
 density](https://changwoo-lee-stat.shinyapps.io/micobin_beta_comparison/)
 
 Please see [MMI data analysis
-code](https://github.com/changwoo-lee/cobin-reproduce/blob/main/Sec6_mmicasestudy/results_main_n949/run_n949.R)
-corresponding to the Section 6 of the
-paper(<https://arxiv.org/abs/2504.15269>). More detailed examples TBA.
+code](https://github.com/changwoo-lee/cobin-reproduce) corresponding to
+the Section 5 of the
+paper(<https://doi.org/10.1080/01621459.2026.2626081>). More detailed
+examples TBA.
 
 ## Code structure
 
