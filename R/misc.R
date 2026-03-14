@@ -7,9 +7,14 @@
 sample.rowwise <- function(Weight) {
   W   <- as.matrix(Weight)
   rs  <- rowSums(W)
-  if (any(!is.finite(rs) | rs <= 0)) stop("Row sums must be positive/finite.")
+  if (any(!is.finite(W) | W < 0)) {
+    stop("All weights must be finite and nonnegative.")
+  }
+  if (any(rs <= 0)) {
+    stop("Each row must have positive total weight.")
+  }
   P   <- W / rs
-  CDF <- rowCumsums(P)
+  CDF <- matrixStats::rowCumsums(P)
   CDF[, ncol(CDF)] <- 1            
   u   <- runif(nrow(CDF))          
   pmin.int(rowSums(u > CDF) + 1L, ncol(CDF))  # clamp
