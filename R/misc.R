@@ -5,10 +5,14 @@
 #
 # return integers with length n, each element in {1,...,K}
 sample.rowwise <- function(Weight) {
-  x <- runif(nrow(Weight))
-  cumul.w <- Weight %*% upper.tri(diag(ncol(Weight)), diag = TRUE)/rowSums(Weight)
-  i <- rowSums(x > cumul.w) + 1L
-  i
+  W   <- as.matrix(Weight)
+  rs  <- rowSums(W)
+  if (any(!is.finite(rs) | rs <= 0)) stop("Row sums must be positive/finite.")
+  P   <- W / rs
+  CDF <- rowCumsums(P)
+  CDF[, ncol(CDF)] <- 1            
+  u   <- runif(nrow(CDF))          
+  pmin.int(rowSums(u > CDF) + 1L, ncol(CDF))  # clamp
 }
 
 # generalized logit transform, transform (a,b) range to real line
@@ -30,4 +34,40 @@ rkg.gamma <- function(n, b= 1, z = 0, kmax = 200){
   temp = matrix(rgamma(n*(kmax + 1), b, 1)/rep(denom, n), nrow = kmax + 1, ncol = n, byrow = F)
   colSums(temp)*(1/(2*pi^2))
 }
+# 
+# ekg = function(b, c){
+#   if(c==0){
+#     return( b/12 )
+#   }else{
+#     return( b*((c/2)*(1/tanh(c/2))-1)/(c^2) )
+#   }
+# }
+
+ekg <- function(b, c) {
+  nb <- length(b); nc <- length(c)
+  
+  # Broadcast scalars
+  if (nb == 1L && nc > 1L) b <- rep(b, nc)
+  if (nc == 1L && nb > 1L) c <- rep(c, nb)
+  
+  # Require matching lengths after broadcasting
+  if (length(b) != length(c)) {
+    stop("Lengths of b and c must match, or one of them must be length 1.")
+  }
+  
+  out  <- numeric(length(c))
+  zero <- (c == 0)
+  
+  # c == 0 branch: limit is b/12
+  out[zero] <- b[zero] / 12
+  
+  # c != 0 branch
+  cz <- c[!zero]
+  out[!zero] <- b[!zero] * ((cz/2) * (1 / tanh(cz/2)) - 1) / (cz^2)
+  
+  out
+}
+
+
+
 
