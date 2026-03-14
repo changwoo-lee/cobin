@@ -68,7 +68,7 @@ spmicobinreg <- function(formula, data, link = "cobit",
                                      beta_scale = 2.5, beta_df = Inf),
                        nngp.control = list(n.neighbors = 15, ord = order(coords[, 1])),
                        nburn = 1000, nsave = 1000, nthin = 1){
-  if(length(lme4::findbars(formula)) > 0) stop("only supports spatial random intercept model")
+  if(length(reformulas::findbars(formula)) > 0) stop("only supports spatial random intercept model")
   if(link != "cobit") stop("only supports cobit link")
 
   # lm object for design matrix constructions

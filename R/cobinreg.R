@@ -82,7 +82,7 @@ cobinreg <- function(formula, data, link = "cobit", contrasts = NULL,
                      nburn = 1000, nsave = 1000, nthin = 1, MH = FALSE, lambda_fixed = NULL){
   if(link != "cobit") stop("only supports cobit link")
 
-  isZ = length(lme4::findbars(formula)) > 0
+  isZ = length(reformulas::findbars(formula)) > 0
   if(!isZ){
     # lm object for design matrix constructions
     # method = "model.frame": model fit is not performed

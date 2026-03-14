@@ -91,7 +91,7 @@ micobinreg <- function(formula, data, link = "cobit", contrasts = NULL,
   }else{
     # version 1.0.x: only supports random intercept model
     # TODO: general mixed model with non-diagonal covariance of random effect
-    if(as.character((lme4::findbars(formula))[[1]])[2]!="1") stop("version 1.0.x only supports random intercept model")
+    if(as.character((reformulas::findbars(formula))[[1]])[2]!="1") stop("version 1.0.x only supports random intercept model")
     
     # lmer object for design matrix constructions
     # optimizer = NULL: model fit is not performed
